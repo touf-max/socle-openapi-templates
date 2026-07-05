@@ -1,0 +1,7 @@
+# Généré par tools/import.mjs — dé-factorisé depuis un OpenAPI existant.
+type: exposed
+info:
+  title: Swagger Petstore
+  version: 1.0.0
+servers:
+  - url: http://petstore.swagger.io/v1

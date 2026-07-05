@@ -1,0 +1,19 @@
+# Généré par tools/import.mjs — dé-factorisé depuis un OpenAPI existant.
+Pet:
+  type: object
+  required:
+    - id
+    - name
+  properties:
+    id:
+      type: integer
+      format: int64
+    name:
+      type: string
+    tag:
+      type: string
+Pets:
+  type: array
+  maxItems: 100
+  items:
+    $ref: '#/components/schemas/Pet'
