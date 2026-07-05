@@ -1,0 +1,96 @@
+# Headers de requête communs (paramètres in:header). Injectés par le build (§6.1/§6.2/§7).
+components:
+  parameters:
+    # --- communs à tous les types ---
+    XRequestId:
+      name: X-Request-Id
+      in: header
+      required: false
+      description: Identifiant unique de la requête (traçabilité).
+      schema: { type: string, format: uuid }
+    XCorrelationId:
+      name: X-Correlation-Id
+      in: header
+      required: false
+      description: Corrélation d'un flux multi-appels de bout en bout.
+      schema: { type: string, format: uuid }
+    XInstitutionId:
+      name: X-Institution-Id
+      in: header
+      required: true
+      description: Institution / entité à l'origine de la requête (toujours obligatoire).
+      schema: { type: string }
+    XUserId:
+      name: X-User-Id
+      in: header
+      required: false
+      description: Utilisateur à l'origine de la requête.
+      schema: { type: string }
+    XUserContextId:
+      name: X-UserContext-Id
+      in: header
+      required: false
+      description: Contexte utilisateur (session / rôle / habilitation).
+      schema: { type: string }
+
+    # --- idempotence (par méthode) ---
+    IdempotencyKeyRequired:
+      name: Idempotency-Key
+      in: header
+      required: true
+      description: Clé d'idempotence (rejeu sûr). Obligatoire sur POST/PATCH.
+      schema: { type: string, format: uuid }
+    IdempotencyKeyOptional:
+      name: Idempotency-Key
+      in: header
+      required: false
+      description: Clé d'idempotence (rejeu sûr). Optionnelle sur PUT/DELETE.
+      schema: { type: string, format: uuid }
+
+    # --- spécifique called + events ---
+    XProcessingRouteId:
+      name: X-Processing-Route-Id
+      in: header
+      required: false
+      description: Route de traitement (dispatch / orchestration interne).
+      schema: { type: string }
+
+    # --- spécifique events : headers d'event obligatoires ---
+    XEventId:
+      name: X-Event-Id
+      in: header
+      required: true
+      description: Identifiant unique de l'event.
+      schema: { type: string, format: uuid }
+    XEventType:
+      name: X-Event-Type
+      in: header
+      required: true
+      description: Type d'event (routing / dispatch côté partenaire).
+      schema: { type: string }
+    XEventVersion:
+      name: X-Event-Version
+      in: header
+      required: true
+      description: Version du contrat de l'event (évolution du payload).
+      schema: { type: string }
+
+    # --- spécifique events : traçabilité de la requête d'origine (optionnels) ---
+    XOriginalRequestId:
+      name: X-Original-Request-Id
+      in: header
+      required: false
+      description: X-Request-Id de la requête à l'origine de l'event.
+      schema: { type: string, format: uuid }
+    XOriginalCorrelationId:
+      name: X-Original-Correlation-Id
+      in: header
+      required: false
+      description: X-Correlation-Id de la requête à l'origine de l'event.
+      schema: { type: string, format: uuid }
+    OriginalIdempotencyKey:
+      name: Original-Idempotency-Key
+      in: header
+      required: false
+      description: Idempotency-Key de la requête à l'origine de l'event.
+      schema: { type: string, format: uuid }

@@ -1,0 +1,15 @@
+# Ruleset Redocly aligné sur les conventions du socle de templating.
+# Les documents générés sont des OpenAPI 3.1 valides ; on désactive ici les règles
+# "recommended" qui entrent en conflit avec des choix d'architecture assumés.
+extends:
+  - recommended
+rules:
+  # Le socle (core) fournit un sur-ensemble de composants ; chaque projet n'en
+  # utilise qu'une partie (ex. pas de pagination pour un webhook).
+  no-unused-components: off
+  # Sécurité gérée au niveau gateway ; signature des webhooks reportée (SPEC §12).
+  security-defined: off
+  # Un profil "events" (webhooks) n'a pas de servers : c'est le partenaire qui héberge.
+  no-empty-servers: off
+  # APIs internes : pas de champ license imposé.
+  info-license: off

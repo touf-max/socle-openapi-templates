@@ -1,0 +1,33 @@
+/payments:
+  post:
+    tags: [payments]
+    operationId: createPayment
+    summary: Initie un paiement chez le partenaire
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/PaymentInput' }
+    responses:
+      '201':
+        description: Paiement initié.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Payment' }
+
+/payments/{paymentId}:
+  get:
+    tags: [payments]
+    operationId: getPayment
+    summary: Statut d'un paiement
+    parameters:
+      - name: paymentId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    responses:
+      '200':
+        description: Paiement.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Payment' }

@@ -1,0 +1,11 @@
+# Projet exemple — type exposed. Ne fournit que le minimum : type, info, servers, tags.
+type: exposed
+info:
+  title: Orders API
+  version: 1.0.0
+  description: API de gestion des commandes exposée par mon SI.
+servers:
+  - url: https://api.mon-si.fr/orders/v1
+tags:
+  - name: orders
+    description: Commandes.

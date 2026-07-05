@@ -1,0 +1,21 @@
+# Enveloppe de pagination page-based (§8.2). Le build génère PageOf<Item> par allOf.
+components:
+  schemas:
+    PageMeta:
+      type: object
+      required: [page, size, totalElements, totalPages]
+      properties:
+        page:          { type: integer, description: "Index de la page (0-based).", minimum: 0 }
+        size:          { type: integer, description: "Taille de la page." }
+        totalElements: { type: integer, description: "Nombre total d'éléments." }
+        totalPages:    { type: integer, description: "Nombre total de pages." }
+    Page:
+      type: object
+      required: [content, page]
+      properties:
+        content:
+          type: array
+          items: {}
+          description: Éléments de la page (type précisé par PageOf<Item>).
+        page:
+          $ref: '#/components/schemas/PageMeta'

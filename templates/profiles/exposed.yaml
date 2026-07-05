@@ -1,0 +1,10 @@
+# Profil "exposed" — API exposée par mon SI. C'est la baseline : elle n'ajoute
+# (quasi) rien au socle. Sécurité par bearer token par défaut.
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []

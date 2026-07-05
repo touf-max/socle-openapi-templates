@@ -1,0 +1,13 @@
+# Profil "called" — API que je définis mais exposée par le SI partenaire (je suis client).
+# Ajoute X-Processing-Route-Id (via le build) + sécurité orientée client.
+# Auth : OAuth2 client-credentials. API key volontairement exclue (politique interne).
+components:
+  securitySchemes:
+    partnerOAuth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://partner.example.com/oauth/token
+          scopes: {}
+security:
+  - partnerOAuth: []

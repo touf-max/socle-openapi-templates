@@ -1,0 +1,42 @@
+# Le projet ne déclare que ses routes et ses réponses 2xx.
+# Headers communs, erreurs, pagination et tri sont injectés au build.
+/orders:
+  get:
+    tags: [orders]
+    operationId: listOrders
+    summary: Liste des commandes
+    x-paginated: '#/components/schemas/Order'   # macro : génère le 200 Page<Order> + page/size/sort
+    responses:
+      '200': ~                                    # rempli par la macro
+  post:
+    tags: [orders]
+    operationId: createOrder
+    summary: Crée une commande
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/OrderInput' }
+    responses:
+      '201':
+        description: Commande créée.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Order' }
+
+/orders/{orderId}:
+  get:
+    tags: [orders]
+    operationId: getOrder
+    summary: Détail d'une commande
+    parameters:
+      - name: orderId
+        in: path
+        required: true
+        schema: { type: string, format: uuid }
+    responses:
+      '200':
+        description: Commande.
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Order' }

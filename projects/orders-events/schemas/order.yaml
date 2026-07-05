@@ -1,0 +1,9 @@
+Order:
+  type: object
+  required: [id, status, amount, createdAt]
+  properties:
+    id:        { type: string, format: uuid }
+    status:    { type: string, enum: [PENDING, CONFIRMED, SHIPPED, CANCELLED] }
+    amount:    { type: number, format: double }
+    currency:  { type: string, default: EUR }
+    createdAt: { type: string, format: date-time }

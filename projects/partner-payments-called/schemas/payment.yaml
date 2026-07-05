@@ -1,0 +1,15 @@
+Payment:
+  type: object
+  required: [id, status, amount]
+  properties:
+    id:       { type: string, format: uuid }
+    status:   { type: string, enum: [INITIATED, AUTHORIZED, CAPTURED, FAILED] }
+    amount:   { type: number, format: double }
+    currency: { type: string, default: EUR }
+PaymentInput:
+  type: object
+  required: [amount, creditorIban]
+  properties:
+    amount:       { type: number, format: double }
+    currency:     { type: string, default: EUR }
+    creditorIban: { type: string }

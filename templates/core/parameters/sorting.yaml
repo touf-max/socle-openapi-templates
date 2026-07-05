@@ -1,0 +1,17 @@
+# Paramètre de tri commun (§8.1). Format répétable : `champ,asc|desc`.
+components:
+  parameters:
+    SortParam:
+      name: sort
+      in: query
+      required: false
+      description: >-
+        Tri multi-critères. Répétable. Format `champ,asc|desc` (direction par
+        défaut : asc). Ex. `?sort=createdAt,desc&sort=id,asc`.
+      style: form
+      explode: true
+      schema:
+        type: array
+        items:
+          type: string
+          pattern: '^[A-Za-z0-9_.]+(,(asc|desc))?$'

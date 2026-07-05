@@ -1,0 +1,10 @@
+# Squelette OpenAPI commun (couche 1). info/servers/tags sont fournis par le projet.
+openapi: 3.1.0
+info:
+  title: Untitled API
+  version: 0.0.0
+components:
+  schemas: {}
+  parameters: {}
+  headers: {}
+  responses: {}

@@ -1,0 +1,64 @@
+# Catalogue d'erreurs communes (§6.4). Chaque réponse porte les headers communs
+# et le schéma StandardErrorObject. Injectées par $ref selon la pertinence.
+components:
+  responses:
+    Error400:
+      description: Requête invalide.
+      headers: &errorHeaders
+        X-Request-Id:          { $ref: '#/components/headers/EchoRequestId' }
+        X-Correlation-Id:      { $ref: '#/components/headers/EchoCorrelationId' }
+        X-Institution-Id:      { $ref: '#/components/headers/EchoInstitutionId' }
+        X-User-Id:             { $ref: '#/components/headers/EchoUserId' }
+        X-UserContext-Id:      { $ref: '#/components/headers/EchoUserContextId' }
+        X-Processing-Route-Id: { $ref: '#/components/headers/ProcessingRouteId' }
+      content: &errorContent
+        application/json:
+          schema: { $ref: '#/components/schemas/StandardErrorObject' }
+    Error401:
+      description: Non authentifié.
+      headers: *errorHeaders
+      content: *errorContent
+    Error403:
+      description: Accès refusé.
+      headers: *errorHeaders
+      content: *errorContent
+    Error404:
+      description: Ressource introuvable.
+      headers: *errorHeaders
+      content: *errorContent
+    Error405:
+      description: Méthode non autorisée.
+      headers: *errorHeaders
+      content: *errorContent
+    Error406:
+      description: Non acceptable.
+      headers: *errorHeaders
+      content: *errorContent
+    Error409:
+      description: Conflit.
+      headers: *errorHeaders
+      content: *errorContent
+    Error422:
+      description: Entité non traitable (validation métier).
+      headers: *errorHeaders
+      content: *errorContent
+    Error429:
+      description: Trop de requêtes.
+      headers: *errorHeaders
+      content: *errorContent
+    Error500:
+      description: Erreur interne.
+      headers: *errorHeaders
+      content: *errorContent
+    Error502:
+      description: Passerelle défaillante.
+      headers: *errorHeaders
+      content: *errorContent
+    Error503:
+      description: Service indisponible.
+      headers: *errorHeaders
+      content: *errorContent
+    Error504:
+      description: Délai de passerelle dépassé.
+      headers: *errorHeaders
+      content: *errorContent

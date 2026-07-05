@@ -1,0 +1,16 @@
+# Profil "events" — webhooks que je pousse vers mes partenaires.
+# Les opérations sont placées sous `webhooks:` par le build ; headers d'event injectés.
+# Payload brut dans le requestBody, aucune enveloppe. Signature HMAC : reportée (cf. SPEC §12).
+# Auth : OAuth2 client-credentials (mon SI s'authentifie auprès de l'endpoint du partenaire).
+# API key volontairement exclue (politique interne).
+components:
+  securitySchemes:
+    eventsOAuth:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: https://partner.example.com/oauth/token
+          scopes: {}
+security:
+  - eventsOAuth: []
+webhooks: {}

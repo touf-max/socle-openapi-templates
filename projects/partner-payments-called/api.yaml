@@ -1,0 +1,11 @@
+# Projet exemple — type called. Contrat que je définis, exposé par le SI partenaire.
+type: called
+info:
+  title: Partner Payments API
+  version: 1.0.0
+  description: API de paiement définie par mon SI et exposée par le partenaire.
+servers:
+  - url: https://partner.example.com/payments/v1
+tags:
+  - name: payments
+    description: Paiements.
