@@ -26,6 +26,7 @@ components:
           description: Détail technique à destination des développeurs.
         moreInfo:
           type: string
+          minLength: 1
           maxLength: 256
           description: Complément d'information / lien de documentation.
     Order:
