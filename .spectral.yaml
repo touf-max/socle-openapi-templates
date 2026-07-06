@@ -4,6 +4,23 @@ extends: ["spectral:oas"]
 
 rules:
 
+  # --- Servers : requis seulement s'il y a des paths (un contrat webhook/events n'en a pas) ---
+  oas3-api-servers: "off"
+  socle-servers-when-paths:
+    description: Un contrat exposant des paths doit déclarer au moins un server.
+    severity: warn
+    given: "$"
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          if:
+            required: [paths]
+            properties: { paths: { type: object, minProperties: 1 } }
+          then:
+            required: [servers]
+            properties: { servers: { type: array, minItems: 1 } }
+
   # --- Sécurité ---
   socle-no-api-key:
     description: Authentification par API key interdite (politique interne).
