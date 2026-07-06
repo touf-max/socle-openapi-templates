@@ -154,6 +154,11 @@ function loadProject(dir) {
   if (!type) throw new Error(`api.yaml sans champ "type" dans ${dir}`);
   delete api.type; // champ de contrôle, pas de l'OpenAPI final
 
+  // Passer les champs optionnels en nullable : activé par défaut, désactivable par projet
+  // (`nullableOptionals: false` dans api.yaml). NB : nullable en réponse est cassant (cf. SPEC §10).
+  const nullableOpt = api.nullableOptionals !== false;
+  delete api.nullableOptionals; // champ de contrôle
+
   const operations = mergeFiles(globYaml(path.join(dir, 'paths')));
   const schemas = mergeFiles(globYaml(path.join(dir, 'schemas')));
   if (type === 'events') {
@@ -163,7 +168,7 @@ function loadProject(dir) {
   }
   const doc = { ...api };
   doc.components = deepMerge(doc.components ?? {}, { schemas });
-  return { type, operations, doc };
+  return { type, operations, doc, nullableOpt };
 }
 
 // ------------------------------------------------------------------ injections
@@ -273,7 +278,7 @@ function nullableOptionals(node) {
 // ------------------------------------------------------------------ assemblage d'un projet
 export function buildProject(dir, outDir = DEFAULT_OUT) {
   const name = path.basename(path.resolve(dir));
-  const { type, operations, doc: projectDoc } = loadProject(dir);
+  const { type, operations, doc: projectDoc, nullableOpt } = loadProject(dir);
 
   let doc = deepMerge(loadCore(), loadProfile(type));
   doc = deepMerge(doc, projectDoc);
@@ -317,7 +322,7 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
   if (isEvents) doc.webhooks = deepMerge(doc.webhooks ?? {}, container);
   else doc.paths = deepMerge(doc.paths ?? {}, container);
 
-  nullableOptionals(doc);      // champs optionnels → nullable (3.1)
+  if (nullableOpt) nullableOptionals(doc); // champs optionnels → nullable (3.1) ; désactivable par projet
   pruneUnusedComponents(doc);  // n'émet que les composants réellement référencés (pas de pagination si non utilisée, etc.)
 
   validateRefs(doc, name);

@@ -215,7 +215,8 @@ Tu n'as **pas** à écrire ceci — le build l'ajoute :
   défini au socle. **Aucune API key** (politique interne).
 - **Champs optionnels → nullable** : à la génération, toute propriété absente de `required`
   devient nullable (`type: [<type>, "null"]`, OpenAPI 3.1) — un champ optionnel peut donc être
-  absent **ou** `null`.
+  absent **ou** `null`. Activé par défaut, désactivable par projet avec `nullableOptionals: false`
+  dans `api.yaml` (utile car nullable en réponse est un changement cassant).
 
 Surcharge par opération possible via `x-errors` / `x-no-errors` (§7).
 
