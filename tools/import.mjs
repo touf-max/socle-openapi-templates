@@ -503,7 +503,9 @@ function importDoc(doc, { type, name, factor = true, host = 'https://api.mon-si.
   const api = { type: resolvedType };
   if (isObj(doc.info)) {
     api.info = {};
-    for (const k of ['title', 'version', 'description']) if (doc.info[k] != null) api.info[k] = doc.info[k];
+    for (const k of ['title', 'version', 'description', 'termsOfService', 'contact', 'license']) {
+      if (doc.info[k] != null) api.info[k] = clone(doc.info[k]);
+    }
   }
   // servers / base path — pas pour les events (webhooks poussés : ni base path ni servers).
   let defaultServer = false;
