@@ -289,9 +289,9 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
         expandPagination(op, doc);
         injectErrors(op, method, pathHasParam);
       }
-      // headers de réponse sur toute réponse définie inline (les $ref d'erreur les portent déjà).
-      // Pas pour les events : le 2XX est l'ack produit par le partenaire, pas par mon SI.
-      if (!isEvents) for (const resp of Object.values(op.responses ?? {})) attachResponseHeaders(resp);
+      // headers de réponse (tous optionnels) sur toute réponse inline, events compris ;
+      // les $ref d'erreur les portent déjà.
+      for (const resp of Object.values(op.responses ?? {})) attachResponseHeaders(resp);
     }
     container[route] = item;
   }

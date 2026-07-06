@@ -135,8 +135,8 @@ Header typé **`uuid`** (`format: uuid`), injecté automatiquement selon la
 
 ### 6.3 Headers de réponse communs (tous types)
 
-Les headers de réponse sont l'**écho des headers de requête**, mais **tous optionnels**,
-plus `X-Processing-Route-Id` **toujours présent** en réponse :
+Les headers de réponse sont l'**écho des headers de requête** plus `X-Processing-Route-Id`,
+**tous optionnels**, attachés à chaque réponse de tous les types (y compris l'ack `204` des events) :
 
 | Header | Requis | Rôle |
 |--------|--------|------|
@@ -145,7 +145,7 @@ plus `X-Processing-Route-Id` **toujours présent** en réponse :
 | `X-Institution-Id` | non | Écho de l'institution. |
 | `X-User-Id` | non | Écho de l'utilisateur. |
 | `X-UserContext-Id` | non | Écho du contexte utilisateur. |
-| `X-Processing-Route-Id` | oui | Route de traitement ayant produit la réponse (présent pour **tous** les types). |
+| `X-Processing-Route-Id` | non | Route de traitement ayant produit la réponse. |
 
 ### 6.4 Codes retour communs (tous types)
 

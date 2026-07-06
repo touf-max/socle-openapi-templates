@@ -287,8 +287,8 @@ components:
       schema:
         type: string
     ProcessingRouteId:
-      description: Route de traitement ayant produit la réponse (présent pour tous les types).
-      required: true
+      description: Route de traitement ayant produit la réponse.
+      required: false
       schema:
         type: string
   responses:

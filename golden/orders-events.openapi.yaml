@@ -275,8 +275,8 @@ components:
       schema:
         type: string
     ProcessingRouteId:
-      description: Route de traitement ayant produit la réponse (présent pour tous les types).
-      required: true
+      description: Route de traitement ayant produit la réponse.
+      required: false
       schema:
         type: string
   responses:
@@ -547,6 +547,19 @@ webhooks:
       responses:
         '204':
           description: Event acquitté par le partenaire (No Content).
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/EchoRequestId'
+            X-Correlation-Id:
+              $ref: '#/components/headers/EchoCorrelationId'
+            X-Institution-Id:
+              $ref: '#/components/headers/EchoInstitutionId'
+            X-User-Id:
+              $ref: '#/components/headers/EchoUserId'
+            X-UserContext-Id:
+              $ref: '#/components/headers/EchoUserContextId'
+            X-Processing-Route-Id:
+              $ref: '#/components/headers/ProcessingRouteId'
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -599,6 +612,19 @@ webhooks:
       responses:
         '204':
           description: Event acquitté par le partenaire (No Content).
+          headers:
+            X-Request-Id:
+              $ref: '#/components/headers/EchoRequestId'
+            X-Correlation-Id:
+              $ref: '#/components/headers/EchoCorrelationId'
+            X-Institution-Id:
+              $ref: '#/components/headers/EchoInstitutionId'
+            X-User-Id:
+              $ref: '#/components/headers/EchoUserId'
+            X-UserContext-Id:
+              $ref: '#/components/headers/EchoUserContextId'
+            X-Processing-Route-Id:
+              $ref: '#/components/headers/ProcessingRouteId'
         '400':
           $ref: '#/components/responses/Error400'
         '401':
