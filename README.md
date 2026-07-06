@@ -281,6 +281,16 @@ L'import :
 Si le contrat source est éclaté en plusieurs fichiers, bundle-le d'abord :
 `npx redocly bundle in.yaml -o bundled.yaml`.
 
+**Import d'events** — avec `--type events`, le swagger source est un contrat **normal** (un
+`path` par event, le **nom de la ressource du path = nom de l'event**). L'import extrait le
+`requestBody` de chaque opération comme **payload** et génère un fichier `events/<event>.yaml`
+(métadonnées `x-event-*` depuis `summary`/`description`/`operationId`/`tags` + le schéma) :
+
+```bash
+openapi-socle import ./webhooks.yaml --type events --out-dir ./apis
+# /order-created (POST, requestBody) → events/order-created.yaml (x-event-type: order-created, payload)
+```
+
 ---
 
 ## 10. Mettre à jour le socle

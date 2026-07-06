@@ -342,6 +342,46 @@ function groupKey(route, isEvents) {
   return seg ? sanitize(seg.replace(/\{.*$/, '') || seg) : 'root';
 }
 
+// Nom de l'event = ressource (dernier segment non-paramétré) du path. Ex. /order-created → order-created.
+function eventNameFromPath(route) {
+  const segs = String(route).split('/').filter(Boolean).filter((s) => !s.startsWith('{'));
+  return segs.length ? segs[segs.length - 1] : 'event';
+}
+
+// Events : un swagger normal, un path par event. Pour chaque path, on extrait le requestBody
+// (payload) et le nom de l'event depuis la ressource du path → un fichier events/ par event
+// (métadonnées x-event-* + schéma de payload au niveau racine).
+function buildEventFiles(source, doc, warnings, is30, nullableStats) {
+  const eventFiles = {};
+  for (const [route, rawItem] of Object.entries(source)) {
+    let item = rawItem;
+    if (isObj(item) && typeof item.$ref === 'string') item = resolveRef(doc, item.$ref);
+    if (!isObj(item)) continue;
+    const method = HTTP_METHODS.find((m) => isObj(item[m]));
+    if (!method) continue;
+    const op = inlineNonSchemaRefs(clone(item[method]), doc, warnings);
+
+    const name = eventNameFromPath(route);
+    const media = op.requestBody?.content?.['application/json']
+      || (isObj(op.requestBody?.content) ? Object.values(op.requestBody.content)[0] : null);
+    let payload = isObj(media?.schema) ? media.schema : {};
+    if (is30) payload = convertNullable(payload, nullableStats);
+    if (!isObj(media?.schema)) warnings.add(`${route} : pas de requestBody JSON — event sans payload.`);
+
+    const ev = { 'x-event-type': name };
+    if (op.summary) ev['x-summary'] = op.summary;
+    if (op.description) ev['x-description'] = op.description;
+    if (op.operationId) ev['x-operation-id'] = op.operationId;
+    if (op['x-event-version']) ev['x-event-version'] = op['x-event-version'];
+    if (Array.isArray(op.tags) && op.tags.length) ev['x-tags'] = op.tags;
+    if (op.deprecated) ev['x-deprecated'] = true;
+    Object.assign(ev, payload); // payload à la racine : $ref nu ou schéma inline
+
+    eventFiles[sanitize(name)] = ev;
+  }
+  return eventFiles;
+}
+
 // ------------------------------------------------------------------ écriture
 const HEADER = '# Généré par tools/import.mjs — dé-factorisé depuis un OpenAPI existant.\n';
 function dump(obj) {
@@ -365,13 +405,19 @@ function importDoc(doc, { type, name, factor = true }) {
     throw new Error(`--type invalide : "${resolvedType}" (attendu exposed|called|events)`);
   }
   const isEvents = resolvedType === 'events';
+  const nullableStats = { nullable: 0, unhandledNullable: 0 };
 
-  // Source des opérations : webhooks pour events, sinon paths.
-  const source = isEvents ? (doc.webhooks || {}) : (doc.paths || {});
+  // Events : swagger normal avec un path par event → payload (requestBody) + nom de la ressource
+  // du path, vers events/. Sinon : opérations regroupées en fichiers paths/.
+  const source = isEvents
+    ? (Object.keys(doc.paths || {}).length ? doc.paths : (doc.webhooks || {}))
+    : (doc.paths || {});
 
-  // --- traitement des opérations, regroupées par fichier ---
-  const files = {}; // groupKey -> { route -> pathItem }
-  for (const [route, rawItemOrRef] of Object.entries(source)) {
+  const files = {};      // paths/ (non-events)
+  const eventFiles = isEvents ? buildEventFiles(source, doc, warnings, is30, nullableStats) : {};
+
+  // --- traitement des opérations paths/ (non-events) ---
+  for (const [route, rawItemOrRef] of Object.entries(isEvents ? {} : source)) {
     let item = rawItemOrRef;
     if (isObj(item) && typeof item.$ref === 'string') item = resolveRef(doc, item.$ref);
     if (!isObj(item)) continue;
@@ -398,7 +444,6 @@ function importDoc(doc, { type, name, factor = true }) {
 
   // --- schémas métier (composants schemas moins le socle et les enveloppes de page) ---
   const allSchemas = isObj(doc.components?.schemas) ? doc.components.schemas : {};
-  const nullableStats = { nullable: 0, unhandledNullable: 0 };
   const schemas = {};
   for (const [schemaName, def] of Object.entries(allSchemas)) {
     if (SOCLE_SCHEMAS.has(schemaName)) continue;
@@ -411,7 +456,7 @@ function importDoc(doc, { type, name, factor = true }) {
 
   // --- purge des schémas devenus orphelins (ex. format d'erreur maison, plus référencé
   //     après remise en conformité des codes retour) ---
-  const roots = collectSchemaRoots(files, new Set());
+  const roots = collectSchemaRoots(isEvents ? eventFiles : files, new Set());
   const reachable = new Set();
   const queue = [...roots];
   while (queue.length) {
@@ -436,7 +481,7 @@ function importDoc(doc, { type, name, factor = true }) {
   if (Array.isArray(doc.tags) && doc.tags.length) api.tags = clone(doc.tags);
 
   return {
-    api, files, schemas, isEvents, resolvedType, name,
+    api, files, eventFiles, schemas, isEvents, resolvedType, name,
     warnings: [...warnings], nullableStats, is30,
     droppedWrappers: [...droppedWrappers], prunedSchemas, stats, factoredSchemas,
   };
@@ -447,12 +492,19 @@ export function writeProject(result, { force, outDir = process.cwd() } = {}) {
   if (fs.existsSync(dir) && !force) {
     throw new Error(`Le dossier "${result.name}" existe déjà (${dir}). Utilisez --force pour écraser.`);
   }
-  fs.mkdirSync(path.join(dir, 'paths'), { recursive: true });
   fs.mkdirSync(path.join(dir, 'schemas'), { recursive: true });
-
   fs.writeFileSync(path.join(dir, 'api.yaml'), dump(result.api));
-  for (const [key, routes] of Object.entries(result.files)) {
-    fs.writeFileSync(path.join(dir, 'paths', `${key}.yaml`), dump(routes));
+
+  if (result.isEvents) {
+    fs.mkdirSync(path.join(dir, 'events'), { recursive: true });
+    for (const [key, ev] of Object.entries(result.eventFiles)) {
+      fs.writeFileSync(path.join(dir, 'events', `${key}.yaml`), dump(ev));
+    }
+  } else {
+    fs.mkdirSync(path.join(dir, 'paths'), { recursive: true });
+    for (const [key, routes] of Object.entries(result.files)) {
+      fs.writeFileSync(path.join(dir, 'paths', `${key}.yaml`), dump(routes));
+    }
   }
   if (Object.keys(result.schemas).length) {
     fs.writeFileSync(path.join(dir, 'schemas', 'schemas.yaml'), dump(result.schemas));
@@ -501,9 +553,13 @@ export function runImportCli(argv = process.argv.slice(2)) {
   const outDir = args.outDir || process.cwd();
   const dir = writeProject(result, { force: args.force, outDir });
 
-  const nbRoutes = Object.values(result.files).reduce((n, r) => n + Object.keys(r).length, 0);
   console.log(`✓ Projet "${result.name}" [${result.resolvedType}] → ${path.relative(process.cwd(), dir) || '.'}/`);
-  console.log(`  ${nbRoutes} route(s) dans ${Object.keys(result.files).length} fichier(s), ${Object.keys(result.schemas).length} schéma(s) métier.`);
+  if (result.isEvents) {
+    console.log(`  ${Object.keys(result.eventFiles).length} event(s) dans events/, ${Object.keys(result.schemas).length} schéma(s) métier.`);
+  } else {
+    const nbRoutes = Object.values(result.files).reduce((n, r) => n + Object.keys(r).length, 0);
+    console.log(`  ${nbRoutes} route(s) dans ${Object.keys(result.files).length} fichier(s), ${Object.keys(result.schemas).length} schéma(s) métier.`);
+  }
   if (result.is30) console.log(`  OpenAPI 3.0 détecté : ${result.nullableStats.nullable} champ(s) nullable convertis en 3.1.`);
   if (result.droppedWrappers.length) console.log(`  Pagination reconstruite (x-paginated), enveloppe(s) retirée(s) : ${result.droppedWrappers.join(', ')}.`);
 
