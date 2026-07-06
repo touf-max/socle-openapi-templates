@@ -188,8 +188,8 @@ StandardErrorObject:
 
 ### 7.1 `exposed` — la baseline
 N'ajoute rien de plus que le socle. Éventuellement :
-headers de rate-limit en réponse (`X-RateLimit-Limit`, `-Remaining`, `-Reset`),
-`security` = bearer/OAuth2.
+headers de rate-limit en réponse (`X-RateLimit-Limit`, `-Remaining`, `-Reset`).
+La sécurité (**bearer JWT**) est généralisée au socle et vaut pour tous les types.
 
 ### 7.2 `called` — j'appelle le partenaire
 Ajoute côté **requête** le header commun aux appels internes :
@@ -198,7 +198,7 @@ Ajoute côté **requête** le header commun aux appels internes :
 |--------|--------|------|
 | `X-Processing-Route-Id` | non | Route de traitement (dispatch/orchestration interne). |
 
-- `security` orienté client : **OAuth2 client-credentials** (API key exclue — politique interne).
+- `security` : **bearer JWT** (généralisée au socle, comme tous les types ; API key exclue).
 - Attentes de SLA/timeout documentées (extension `x-sla`).
 - (`Idempotency-Key` reste géré au socle, par méthode — cf. §6.2.)
 
@@ -379,15 +379,14 @@ expansées par le build).
 - ✅ Assemblage : **script de merge maison** (`build.mjs`).
 - ✅ Pagination : **page-based, 0-based**, `size` défaut 20 / max 100.
 - ✅ Webhook : **pas d'enveloppe**, payload brut dans le `requestBody`, métadonnées en headers.
-- ✅ Auth : **API key exclue partout** (politique interne). `exposed` = bearer JWT ;
-  `called` & `events` = OAuth2 client-credentials.
+- ✅ Auth : **bearer JWT généralisé à tous les types** (`exposed`/`called`/`events`),
+  défini au socle (`core/base.yaml`). **API key exclue partout** (politique interne).
 
 **Restant à trancher :**
 - Enveloppe de collection `Page` **ou** headers `Link` (RFC 8288) — l'un, l'autre, les deux ?
 - OpenAPI **3.1** confirmé (nécessaire pour `webhooks`) ?
-- Schémas d'auth par type — **API key exclue (politique interne)**. Reste à confirmer
-  entre bearer / OAuth2 / mTLS : `exposed` = bearer JWT, `called` & `events` = OAuth2
-  client-credentials (état actuel du socle).
+- Schémas d'auth — **tranché** : bearer JWT généralisé à tous les types (§7), API key
+  exclue. mTLS/OAuth2 restent envisageables par projet en surcharge si besoin.
 - Liste exacte des codes d'erreur communs à retenir dans le socle.
 - **Signature des webhooks (reportée)** : ajouter `X-Webhook-Signature` + `X-Webhook-Timestamp`
   quand décidé. Reco : **HMAC-SHA256** sur `timestamp + "." + body`, clé secrète par

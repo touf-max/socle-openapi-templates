@@ -1,4 +1,5 @@
 # Squelette OpenAPI commun (couche 1). info/servers/tags sont fournis par le projet.
+# Sécurité généralisée à TOUS les types : bearer JWT (jamais d'API key).
 openapi: 3.1.0
 info:
   title: Untitled API
@@ -8,3 +9,10 @@ components:
   parameters: {}
   headers: {}
   responses: {}
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+security:
+  - bearerAuth: []

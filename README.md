@@ -173,8 +173,8 @@ Le champ `type:` de `api.yaml` choisit le profil.
 | `called` | le partenaire | API que je définis mais que le partenaire expose (je suis client) |
 | `events` | mon SI (push) | webhooks poussés vers mes partenaires |
 
-- **`called`** ajoute le header `X-Processing-Route-Id` et une sécurité orientée client (OAuth2
-  client-credentials).
+- **`called`** ajoute le header `X-Processing-Route-Id`. La sécurité (bearer JWT) est commune à
+  tous les types.
 - **`events`** bascule les opérations sous **`webhooks:`**, ajoute les headers d'event, envoie
   le **payload brut** (pas d'enveloppe) et attend un **ack `2xx`**. Exemple :
   ```yaml
@@ -209,8 +209,8 @@ Tu n'as **pas** à écrire ceci — le build l'ajoute :
 - **Headers de réponse communs** sur chaque `2xx` (échos + `X-Processing-Route-Id`).
 - **Pagination** (via `x-paginated`) : enveloppe `Page` = `content[]` + `pagination` (`page`,
   `size`, `totalElements`, `totalPages`, `hasNext`, `hasPrevious`) et params `page`/`size`/`sort`.
-- **Sécurité par profil** : `exposed` = bearer JWT ; `called`/`events` = OAuth2
-  client-credentials. **Aucune API key** (politique interne).
+- **Sécurité** : **bearer JWT** généralisé à tous les types (`exposed`/`called`/`events`),
+  défini au socle. **Aucune API key** (politique interne).
 
 Surcharge par opération possible via `x-errors` / `x-no-errors` (§7).
 
