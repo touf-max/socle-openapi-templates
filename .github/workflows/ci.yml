@@ -17,7 +17,8 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run build
-      - run: npx redocly lint build/*.openapi.yaml
+      - run: npm run lint        # Redocly : validité OpenAPI
+      - run: npm run spectral    # Spectral : conformité au socle
 
   non-regression:
     runs-on: ubuntu-latest

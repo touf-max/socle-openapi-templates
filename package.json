@@ -11,6 +11,7 @@
     "tools",
     "templates",
     "redocly.yaml",
+    ".spectral.yaml",
     "SPEC.md"
   ],
   "engines": {
@@ -21,6 +22,7 @@
     "build:one": "node tools/build.mjs --project",
     "import": "node tools/import.mjs",
     "lint": "redocly lint build/*.openapi.yaml",
+    "spectral": "spectral lint \"build/*.openapi.yaml\" --ruleset .spectral.yaml --fail-severity=error",
     "check:regression": "node tools/check-regression.mjs",
     "golden:update": "node tools/build.mjs && cp build/*.openapi.yaml golden/"
   },
@@ -28,7 +30,8 @@
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "@redocly/cli": "^1.25.0"
+    "@redocly/cli": "^1.25.0",
+    "@stoplight/spectral-cli": "^6.16.1"
   },
   "publishConfig": {
     "@monsi:registry": "https://artifactory.example.com/artifactory/api/npm/npm-local/"

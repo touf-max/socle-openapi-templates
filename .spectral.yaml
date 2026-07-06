@@ -1,0 +1,63 @@
+# Règles Spectral de conformité au socle, appliquées aux contrats BUNDLÉS (build/*.openapi.yaml).
+# Complète Redocly (validité OpenAPI) par les conventions maison. Sévérité error = bloquant.
+extends: ["spectral:oas"]
+
+rules:
+  # Le socle livre un sur-ensemble de composants ; chaque projet n'en utilise qu'une partie
+  # (comme no-unused-components: off côté Redocly).
+  oas3-unused-component: "off"
+
+  # --- Sécurité ---
+  socle-no-api-key:
+    description: Authentification par API key interdite (politique interne).
+    message: "securityScheme '{{property}}' de type apiKey interdit — bearer JWT attendu."
+    severity: error
+    given: "$.components.securitySchemes[*]"
+    then:
+      field: type
+      function: pattern
+      functionOptions:
+        notMatch: "^apiKey$"
+  socle-security-required:
+    description: Le contrat doit déclarer une sécurité globale.
+    severity: error
+    given: "$"
+    then:
+      field: security
+      function: truthy
+
+  # --- Traçabilité du socle ---
+  socle-version-stamp:
+    description: Le contrat doit porter info.x-socle-version (version du socle générateur).
+    severity: error
+    given: "$.info"
+    then:
+      field: x-socle-version
+      function: truthy
+
+  # --- Opérations ---
+  socle-operation-id:
+    description: Chaque opération doit avoir un operationId.
+    severity: error
+    given:
+      - "$.paths[*][get,put,post,delete,patch,options,head,trace]"
+      - "$.webhooks[*][get,put,post,delete,patch,options,head,trace]"
+    then:
+      field: operationId
+      function: truthy
+  socle-operation-tagged:
+    description: Chaque opération de path doit être taggée.
+    severity: error
+    given: "$.paths[*][get,put,post,delete,patch]"
+    then:
+      field: tags
+      function: truthy
+
+  # --- Format d'erreur commun ---
+  socle-standard-error-object:
+    description: Le schéma commun d'erreur StandardErrorObject doit être présent.
+    severity: error
+    given: "$.components.schemas"
+    then:
+      field: StandardErrorObject
+      function: truthy

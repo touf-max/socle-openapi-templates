@@ -15,7 +15,8 @@ lint:
   script:
     - npm ci
     - npm run build
-    - npx redocly lint build/*.openapi.yaml
+    - npm run lint          # Redocly : validité OpenAPI
+    - npm run spectral      # Spectral : conformité au socle
 
 non-regression:
   stage: check
