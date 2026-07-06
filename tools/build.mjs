@@ -136,7 +136,9 @@ function loadEvents(dir) {
       requestBody: { required: true, content: { 'application/json': { schema: { $ref: schemaRef } } } },
       responses: { '2xx': null },
     };
-    if (raw['x-summary']) post.summary = raw['x-summary'];
+    // summary : intègre les valeurs documentées de x-event-type / x-event-version.
+    const tv = raw['x-event-version'] ? `${type} v${raw['x-event-version']}` : type;
+    post.summary = raw['x-summary'] ? `${raw['x-summary']} (${tv})` : tv;
     if (raw['x-description']) post.description = raw['x-description'];
     if (raw['x-event-version']) post['x-event-version'] = raw['x-event-version'];
     if (raw['x-tags']) post.tags = raw['x-tags'];
@@ -169,6 +171,17 @@ function ensureParam(op, ref) {
   op.parameters ??= [];
   const key = ref.$ref;
   if (!op.parameters.some((p) => p.$ref === key)) op.parameters.push(ref);
+}
+
+// Remplace le paramètre $ref <compName> par une copie inline portant un example spécifique
+// (un $ref ne peut pas porter d'example propre à l'opération).
+function inlineParamExample(op, doc, compName, example) {
+  if (example == null || !Array.isArray(op.parameters)) return;
+  const ref = `#/components/parameters/${compName}`;
+  const idx = op.parameters.findIndex((p) => p.$ref === ref);
+  const comp = doc.components?.parameters?.[compName];
+  if (idx === -1 || !isObj(comp)) return;
+  op.parameters[idx] = { ...structuredClone(comp), example };
 }
 
 function injectRequestHeaders(op, type) {
@@ -281,9 +294,14 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
       if (isEvents) {
         // events : payload brut, ack 204 (No Content) + codes d'erreur communs ;
         // pas de pagination, pas d'Idempotency-Key (dédup via X-Event-Id).
+        const evType = op['x-event'];
+        const evVersion = op['x-event-version'];
         delete op['x-event']; // marqueur documentaire ; l'injection est pilotée par le type
         normalizeEventAck(op);                  // réponse de succès → 204
         injectErrors(op, method, pathHasParam); // catalogue d'erreurs commun
+        // exemples spécifiques à l'event sur X-Event-Type / X-Event-Version (params inlinés).
+        inlineParamExample(op, doc, 'XEventType', evType);
+        inlineParamExample(op, doc, 'XEventVersion', evVersion);
       } else {
         injectIdempotency(op, method);
         expandPagination(op, doc);

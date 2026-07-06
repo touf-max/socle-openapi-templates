@@ -115,6 +115,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     XCorrelationId:
       name: X-Correlation-Id
       in: header
@@ -123,6 +124,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     XInstitutionId:
       name: X-Institution-Id
       in: header
@@ -130,6 +132,7 @@ components:
       description: Institution / entité à l'origine de la requête (toujours obligatoire).
       schema:
         type: string
+      example: BANK-FR-001
     XUserId:
       name: X-User-Id
       in: header
@@ -137,6 +140,7 @@ components:
       description: Utilisateur à l'origine de la requête.
       schema:
         type: string
+      example: user-42
     XUserContextId:
       name: X-UserContext-Id
       in: header
@@ -144,6 +148,7 @@ components:
       description: Contexte utilisateur (session / rôle / habilitation).
       schema:
         type: string
+      example: ctx-8a1f9c
     IdempotencyKeyRequired:
       name: Idempotency-Key
       in: header
@@ -152,6 +157,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91
     IdempotencyKeyOptional:
       name: Idempotency-Key
       in: header
@@ -160,6 +166,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91
     XProcessingRouteId:
       name: X-Processing-Route-Id
       in: header
@@ -167,6 +174,7 @@ components:
       description: Route de traitement (dispatch / orchestration interne).
       schema:
         type: string
+      example: orders-v1
     XEventId:
       name: X-Event-Id
       in: header
@@ -175,6 +183,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 1c9d4e2f-8a7b-4c3d-9e1f-2a3b4c5d6e7f
     XEventType:
       name: X-Event-Type
       in: header
@@ -182,6 +191,7 @@ components:
       description: Type d'event (routing / dispatch côté partenaire).
       schema:
         type: string
+      example: order.created
     XEventVersion:
       name: X-Event-Version
       in: header
@@ -189,6 +199,7 @@ components:
       description: Version du contrat de l'event (évolution du payload).
       schema:
         type: string
+      example: 1.0.0
     XOriginalRequestId:
       name: X-Original-Request-Id
       in: header
@@ -197,6 +208,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     XOriginalCorrelationId:
       name: X-Original-Correlation-Id
       in: header
@@ -205,6 +217,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     OriginalIdempotencyKey:
       name: Original-Idempotency-Key
       in: header
@@ -213,6 +226,7 @@ components:
       schema:
         type: string
         format: uuid
+      example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91
     PageParam:
       name: page
       in: query
@@ -253,32 +267,38 @@ components:
       schema:
         type: string
         format: uuid
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     EchoCorrelationId:
       description: Écho de la corrélation.
       required: false
       schema:
         type: string
         format: uuid
+      example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     EchoInstitutionId:
       description: Écho de l'institution.
       required: false
       schema:
         type: string
+      example: BANK-FR-001
     EchoUserId:
       description: Écho de l'utilisateur.
       required: false
       schema:
         type: string
+      example: user-42
     EchoUserContextId:
       description: Écho du contexte utilisateur.
       required: false
       schema:
         type: string
+      example: ctx-8a1f9c
     ProcessingRouteId:
       description: Route de traitement ayant produit la réponse.
       required: false
       schema:
         type: string
+      example: orders-v1
   responses:
     Error400:
       description: Requête invalide.
@@ -584,7 +604,7 @@ webhooks:
           $ref: '#/components/responses/Error503'
         '504':
           $ref: '#/components/responses/Error504'
-      summary: Émis lorsqu'une commande est annulée
+      summary: Émis lorsqu'une commande est annulée (order.cancelled v1.0.0)
       description: Notifie le partenaire de l'annulation d'une commande.
       x-event-version: 1.0.0
       parameters:
@@ -595,8 +615,20 @@ webhooks:
         - $ref: '#/components/parameters/XUserContextId'
         - $ref: '#/components/parameters/XProcessingRouteId'
         - $ref: '#/components/parameters/XEventId'
-        - $ref: '#/components/parameters/XEventType'
-        - $ref: '#/components/parameters/XEventVersion'
+        - name: X-Event-Type
+          in: header
+          required: true
+          description: Type d'event (routing / dispatch côté partenaire).
+          schema:
+            type: string
+          example: order.cancelled
+        - name: X-Event-Version
+          in: header
+          required: true
+          description: Version du contrat de l'event (évolution du payload).
+          schema:
+            type: string
+          example: 1.0.0
         - $ref: '#/components/parameters/XOriginalRequestId'
         - $ref: '#/components/parameters/XOriginalCorrelationId'
         - $ref: '#/components/parameters/OriginalIdempotencyKey'
@@ -649,7 +681,7 @@ webhooks:
           $ref: '#/components/responses/Error503'
         '504':
           $ref: '#/components/responses/Error504'
-      summary: Émis lorsqu'une commande est créée
+      summary: Émis lorsqu'une commande est créée (order.created v1.0.0)
       description: Notifie le partenaire de la création d'une commande.
       x-event-version: 1.0.0
       parameters:
@@ -660,8 +692,20 @@ webhooks:
         - $ref: '#/components/parameters/XUserContextId'
         - $ref: '#/components/parameters/XProcessingRouteId'
         - $ref: '#/components/parameters/XEventId'
-        - $ref: '#/components/parameters/XEventType'
-        - $ref: '#/components/parameters/XEventVersion'
+        - name: X-Event-Type
+          in: header
+          required: true
+          description: Type d'event (routing / dispatch côté partenaire).
+          schema:
+            type: string
+          example: order.created
+        - name: X-Event-Version
+          in: header
+          required: true
+          description: Version du contrat de l'event (évolution du payload).
+          schema:
+            type: string
+          example: 1.0.0
         - $ref: '#/components/parameters/XOriginalRequestId'
         - $ref: '#/components/parameters/XOriginalCorrelationId'
         - $ref: '#/components/parameters/OriginalIdempotencyKey'

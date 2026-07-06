@@ -261,6 +261,10 @@ Métadonnées reconnues : `x-event-type` (obligatoire), `x-event-version`, `x-su
 **schéma de payload** : soit un `$ref` nu (réutilisé tel quel), soit un schéma inline
 (enregistré comme composant `<EventType>Event`).
 
+Le build reporte les valeurs de `x-event-type` / `x-event-version` **dans le `summary`** de
+l'opération (ex. `… (order.created v1.0.0)`) **et en `example`** des headers `X-Event-Type` /
+`X-Event-Version`. Plus généralement, **tous les headers communs portent un `example`**.
+
 > L'écriture manuelle sous `paths/` (une clé d'event `order.created:` avec `x-event`) reste
 > possible ; `events/` est la voie recommandée (déclaratif, un fichier par event).
 

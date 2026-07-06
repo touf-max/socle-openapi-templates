@@ -1,28 +1,34 @@
-# Headers de réponse communs (§6.3) : écho des headers de requête, tous optionnels,
-# plus X-Processing-Route-Id toujours présent. Injectés sur chaque réponse par le build.
+# Headers de réponse communs (§6.3) : écho des headers de requête plus X-Processing-Route-Id,
+# tous optionnels. Injectés sur chaque réponse par le build.
 components:
   headers:
     EchoRequestId:
       description: Écho de l'identifiant de requête.
       required: false
       schema: { type: string, format: uuid }
+      example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     EchoCorrelationId:
       description: Écho de la corrélation.
       required: false
       schema: { type: string, format: uuid }
+      example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     EchoInstitutionId:
       description: Écho de l'institution.
       required: false
       schema: { type: string }
+      example: BANK-FR-001
     EchoUserId:
       description: Écho de l'utilisateur.
       required: false
       schema: { type: string }
+      example: user-42
     EchoUserContextId:
       description: Écho du contexte utilisateur.
       required: false
       schema: { type: string }
+      example: ctx-8a1f9c
     ProcessingRouteId:
       description: Route de traitement ayant produit la réponse.
       required: false
       schema: { type: string }
+      example: orders-v1
