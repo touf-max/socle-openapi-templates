@@ -39,6 +39,16 @@ rules:
     then:
       field: security
       function: truthy
+  socle-operation-secured:
+    description: Une opération ne doit pas désactiver la sécurité globale (security: []).
+    severity: error
+    given:
+      - "$.paths[*][get,put,post,delete,patch].security"
+      - "$.webhooks[*][get,put,post,delete,patch].security"
+    then:
+      function: length
+      functionOptions:
+        min: 1
 
   # --- Traçabilité du socle ---
   socle-version-stamp:
@@ -65,6 +75,15 @@ rules:
     given: "$.paths[*][get,put,post,delete,patch]"
     then:
       field: tags
+      function: truthy
+
+  # --- Schémas ---
+  socle-array-items:
+    description: Un schéma de type array doit définir le type de ses items.
+    severity: error
+    given: "$..[?(@.type=='array')]"
+    then:
+      field: items
       function: truthy
 
   # --- Format d'erreur commun ---
