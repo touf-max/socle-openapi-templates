@@ -79,6 +79,16 @@ rules:
       function: truthy
 
   # --- Schémas ---
+  socle-field-casing:
+    description: Les noms de champs doivent être en camelCase et ne pas commencer par un chiffre.
+    message: "Nom de champ non conforme (attendu camelCase, ^[a-z][a-zA-Z0-9]*$)."
+    severity: error
+    given: "$..properties.*~"
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z][a-zA-Z0-9]*$"
+
   socle-array-items:
     description: Un schéma de type array (même nullable) doit définir le type de ses items.
     severity: error
