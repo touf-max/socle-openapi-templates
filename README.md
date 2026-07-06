@@ -179,7 +179,8 @@ Le champ `type:` de `api.yaml` choisit le profil.
 - **`called`** ajoute le header `X-Processing-Route-Id`. La sécurité (bearer JWT) est commune à
   tous les types.
 - **`events`** bascule les opérations sous **`webhooks:`**, ajoute les headers d'event, envoie
-  le **payload brut** (pas d'enveloppe) et attend un **ack `2xx`**. On déclare chaque event dans
+  le **payload brut** (pas d'enveloppe) et attend un **ack `204`** (+ catalogue d'erreurs commun).
+  On déclare chaque event dans
   un fichier de **`events/`** (JSON Schema du payload + métadonnées `x-event-*`) ; le build en
   génère le webhook :
   ```yaml

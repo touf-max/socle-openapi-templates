@@ -238,12 +238,14 @@ Non inclus pour le moment.
 > `X-Webhook-Signature` (+ `X-Webhook-Timestamp`) — cf. §12.
 
 - **Pas de pagination** (events poussés unitairement).
-- Réponses **attendues du partenaire** : `2xx` = ack ; sinon rejeu selon politique
-  de retry (extension `x-retry`), puis dead-letter.
+- Réponses **attendues du partenaire** : **`204`** (No Content) = ack, plus le **catalogue
+  d'erreurs commun** (`400 401 403 405 406 409 422 429 500 502 503 504`) ; sinon rejeu selon
+  politique de retry (extension `x-retry`), puis dead-letter.
 
 **Répertoire `events/`** — pour un projet `events`, chaque fichier de `events/` est un
 **JSON Schema du payload** enrichi de **métadonnées `x-event-*`** ; le build en **génère
-automatiquement le webhook** (clé = `x-event-type`), injecte les headers d'event et l'ack `2xx`.
+automatiquement le webhook** (clé = `x-event-type`), injecte les headers d'event, l'ack `204`
+et le catalogue d'erreurs commun.
 
 ```yaml
 # mon-api/events/order-created.yaml   (type: events)

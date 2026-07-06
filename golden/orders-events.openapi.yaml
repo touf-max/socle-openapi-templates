@@ -545,8 +545,32 @@ webhooks:
             schema:
               $ref: '#/components/schemas/Order'
       responses:
-        2XX:
-          description: Event acquitté par le partenaire.
+        '204':
+          description: Event acquitté par le partenaire (No Content).
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '405':
+          $ref: '#/components/responses/Error405'
+        '406':
+          $ref: '#/components/responses/Error406'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '502':
+          $ref: '#/components/responses/Error502'
+        '503':
+          $ref: '#/components/responses/Error503'
+        '504':
+          $ref: '#/components/responses/Error504'
       summary: Émis lorsqu'une commande est annulée
       description: Notifie le partenaire de l'annulation d'une commande.
       x-event-version: 1.0.0
@@ -573,8 +597,32 @@ webhooks:
             schema:
               $ref: '#/components/schemas/Order'
       responses:
-        2XX:
-          description: Event acquitté par le partenaire.
+        '204':
+          description: Event acquitté par le partenaire (No Content).
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '405':
+          $ref: '#/components/responses/Error405'
+        '406':
+          $ref: '#/components/responses/Error406'
+        '409':
+          $ref: '#/components/responses/Error409'
+        '422':
+          $ref: '#/components/responses/Error422'
+        '429':
+          $ref: '#/components/responses/Error429'
+        '500':
+          $ref: '#/components/responses/Error500'
+        '502':
+          $ref: '#/components/responses/Error502'
+        '503':
+          $ref: '#/components/responses/Error503'
+        '504':
+          $ref: '#/components/responses/Error504'
       summary: Émis lorsqu'une commande est créée
       description: Notifie le partenaire de la création d'une commande.
       x-event-version: 1.0.0

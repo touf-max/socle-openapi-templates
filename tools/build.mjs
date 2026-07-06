@@ -279,10 +279,11 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
       injectRequestHeaders(op, type);
 
       if (isEvents) {
-        // events : payload brut, pas de pagination, pas de catalogue d'erreurs,
-        // pas d'Idempotency-Key (dédup via X-Event-Id ; origine via Original-Idempotency-Key).
+        // events : payload brut, ack 204 (No Content) + codes d'erreur communs ;
+        // pas de pagination, pas d'Idempotency-Key (dédup via X-Event-Id).
         delete op['x-event']; // marqueur documentaire ; l'injection est pilotée par le type
-        normalizeAckResponses(op);
+        normalizeEventAck(op);                  // réponse de succès → 204
+        injectErrors(op, method, pathHasParam); // catalogue d'erreurs commun
       } else {
         injectIdempotency(op, method);
         expandPagination(op, doc);
@@ -308,17 +309,11 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
   return { name, type, outFile, operations: Object.keys(operations).length };
 }
 
-// events : transforme une réponse d'ack déclarée `'2xx': ~` en 2XX avec description.
-function normalizeAckResponses(op) {
+// events : la réponse de succès est un 204 (ack sans corps). Retire toute réponse 2xx déclarée.
+function normalizeEventAck(op) {
   op.responses ??= {};
-  for (const key of Object.keys(op.responses)) {
-    if (/^2xx$/i.test(key)) {
-      const val = op.responses[key];
-      delete op.responses[key];
-      op.responses['2XX'] = isObj(val) ? val : { description: 'Event acquitté par le partenaire.' };
-    }
-  }
-  if (!Object.keys(op.responses).length) op.responses['2XX'] = { description: 'Event acquitté par le partenaire.' };
+  for (const key of Object.keys(op.responses)) if (/^2/.test(key)) delete op.responses[key];
+  op.responses['204'] = { description: 'Event acquitté par le partenaire (No Content).' };
 }
 
 // ------------------------------------------------------------------ validation légère des $ref internes
