@@ -340,8 +340,15 @@ variables:
 
 Il fournit trois jobs : **`openapi:lint`** (Redocly), **`openapi:breaking`** (échoue si une
 rupture n'est pas assumée par une nouvelle majeure, en comparant à la dernière baseline publiée),
-et **`openapi:release`** (sur tag `vX.Y.Z`, publie le contrat versionné sur Artifactory). La
-baseline stockée sur Artifactory devient la référence du prochain diff.
+et **`openapi:release`** (sur tag `vX.Y.Z`, publie le contrat versionné sur Artifactory).
+
+**Où est définie la baseline ?** — selon le contexte :
+
+| Contexte | Baseline | Défini par |
+|----------|----------|-----------|
+| Projet en CI | le contrat publié sous `…/latest/openapi.yaml` | la variable `ARTIFACTORY_OPENAPI_URL` (le job `openapi:release`, sur tag, publie/actualise ce `latest/`) |
+| Socle (ce dépôt) | le dossier `golden/` (committé) | `npm run golden:update` (chemin figé dans `tools/check-regression.mjs`) |
+| Ad-hoc / local | le fichier de ton choix | le 1er argument de `openapi-socle diff <baseline> <revision>` |
 
 ## 12. Développer le socle (ce dépôt)
 
