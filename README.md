@@ -352,9 +352,17 @@ npm run lint             # validité OpenAPI (Redocly)
 npm run spectral         # conformité au socle (Spectral : pas d'API key, headers communs, Idempotency-Key
                          #   par méthode, X-Processing-Route-Id en réponse, identifiants au format uuid,
                          #   x-socle-version, operationId, tags…)
-npm run check:regression # compare examples/ aux baselines golden/ (échoue sur rupture)
+npm run check:regression # compare examples/ aux baselines golden/ (échoue sur rupture) — nécessite oasdiff
 npm run golden:update    # régénère les baselines golden/ (après un changement assumé)
 npm pack --dry-run       # aperçu du package publié
+```
+
+Le pipeline complet en local : `npm run build && npm run lint && npm run spectral && npm run check:regression`.
+
+**Installer `oasdiff`** (requis par `check:regression` et `openapi-socle diff`) :
+```bash
+curl -fsSL https://raw.githubusercontent.com/oasdiff/oasdiff/main/install.sh | sh
+# à défaut, avoir Docker : le wrapper utilise l'image tufin/oasdiff en repli
 ```
 
 **Non-régression du socle** — `golden/` contient les contrats de référence des `examples/`.
