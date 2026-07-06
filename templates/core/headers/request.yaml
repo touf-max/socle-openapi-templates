@@ -21,7 +21,7 @@ components:
       in: header
       required: true
       description: A unique identifier representing the banking institution context (bank code) associated with the request.
-      schema: { type: string }
+      schema: { type: string, minLength: 3, maxLength: 20 }
       example: BANK-FR-001
     XUserId:
       name: X-User-Id
@@ -43,14 +43,14 @@ components:
       name: Idempotency-Key
       in: header
       required: true
-      description: Clé d'idempotence (rejeu sûr). Obligatoire sur POST/PATCH.
+      description: A client-generated unique key ensuring that retrying the same request multiple times produces the same result without duplicate side effects.
       schema: { type: string, format: uuid }
       example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91
     IdempotencyKeyOptional:
       name: Idempotency-Key
       in: header
       required: false
-      description: Clé d'idempotence (rejeu sûr). Optionnelle sur PUT/DELETE.
+      description: A client-generated unique key ensuring that retrying the same request multiple times produces the same result without duplicate side effects.
       schema: { type: string, format: uuid }
       example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91
 
@@ -59,52 +59,52 @@ components:
       name: X-Processing-Route-Id
       in: header
       required: false
-      description: Route de traitement (dispatch / orchestration interne).
-      schema: { type: string }
-      example: orders-v1
+      description: An identifier indicating the processing route selected by the infrastructure for this message.
+      schema: { type: string, maxLength: 36 }
+      example: prod.eu-west-1.silo-1
 
     # --- spécifique events : headers d'event obligatoires ---
     XEventId:
       name: X-Event-Id
       in: header
       required: true
-      description: Identifiant unique de l'event.
+      description: Unique identifier of the event. Used to identify technical duplicates.
       schema: { type: string, format: uuid }
       example: 1c9d4e2f-8a7b-4c3d-9e1f-2a3b4c5d6e7f
     XEventType:
       name: X-Event-Type
       in: header
       required: true
-      description: Type d'event (routing / dispatch côté partenaire).
-      schema: { type: string }
+      description: The type of the event.
+      schema: { type: string, maxLength: 36 }
       example: order.created
     XEventVersion:
       name: X-Event-Version
       in: header
       required: true
-      description: Version du contrat de l'event (évolution du payload).
+      description: Specifies the version of the JSON schema used to structure the event payload, allowing consumers to handle schema evolution gracefully.
       schema: { type: string }
-      example: 1.0.0
+      example: 1.0
 
     # --- spécifique events : traçabilité de la requête d'origine (optionnels) ---
     XOriginalRequestId:
       name: X-Original-Request-Id
       in: header
       required: false
-      description: X-Request-Id de la requête à l'origine de l'event.
+      description: Value of the X-Request-Id header of the original request initiated by the bank.
       schema: { type: string, format: uuid }
       example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     XOriginalCorrelationId:
       name: X-Original-Correlation-Id
       in: header
       required: false
-      description: X-Correlation-Id de la requête à l'origine de l'event.
+      description: Value of the X-Correlation-Id header of the original request initiated by the bank.
       schema: { type: string, format: uuid }
       example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     OriginalIdempotencyKey:
       name: Original-Idempotency-Key
       in: header
       required: false
-      description: Idempotency-Key de la requête à l'origine de l'event.
+      description: Value of the Idempotency-Key header of the original request initiated by the bank.
       schema: { type: string, format: uuid }
       example: 9b2e4a17-6c3d-4f2a-b1e8-0d7c5a3f2b91

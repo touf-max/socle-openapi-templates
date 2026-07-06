@@ -3,32 +3,32 @@
 components:
   headers:
     EchoRequestId:
-      description: Écho de l'identifiant de requête.
+      description: Echoes the corresponding request header if provided in the request.
       required: false
       schema: { type: string, format: uuid }
       example: 3fa85f64-5717-4562-b3fc-2c963f66afa6
     EchoCorrelationId:
-      description: Écho de la corrélation.
+      description: Echoes the corresponding request header if provided in the request.
       required: false
       schema: { type: string, format: uuid }
       example: 7d5c2b9e-2f3a-4c1d-8e6f-9a0b1c2d3e4f
     EchoInstitutionId:
-      description: Écho de l'institution.
+      description: Echoes the corresponding request header if provided in the request.
       required: false
-      schema: { type: string }
+      schema: { type: string, minLength: 3, maxLength: 20 }
       example: BANK-FR-001
     EchoUserId:
-      description: Écho de l'utilisateur.
+      description: Echoes the corresponding request header if provided in the request.
       required: false
-      schema: { type: string }
+      schema: { type: string, maxLength: 128 }
       example: user-42
     EchoUserContextId:
-      description: Écho du contexte utilisateur.
+      description: Echoes the corresponding request header if provided in the request.
       required: false
-      schema: { type: string }
+      schema: { type: string, maxLength: 4 }
       example: ctx-8a1f9c
     ProcessingRouteId:
-      description: Route de traitement ayant produit la réponse.
+      description: An identifier indicating the processing route selected by the infrastructure for this message.
       required: false
-      schema: { type: string }
-      example: orders-v1
+      schema: { type: string, maxLength: 36 }
+      example: prod.eu-west-1.silo-1
