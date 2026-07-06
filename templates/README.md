@@ -3,7 +3,7 @@
 Couches assemblées par `tools/build.mjs` (voir `../SPEC.md`) :
 
 - **`core/`** — couche 1, commune à tous les types : squelette OpenAPI, headers de
-  requête/réponse, catalogue d'erreurs, `StandardErrorObject`, pagination/tri.
+  requête/réponse, catalogue d'erreurs, `StandardError`, pagination/tri.
 - **`profiles/`** — couche 2, une par type : `exposed`, `called`, `events`.
 
 Un projet (couche 3, dans `../projects/<nom>/`) ne fournit que : `type`, `info`,

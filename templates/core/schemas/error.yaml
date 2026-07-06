@@ -1,19 +1,10 @@
-# Format d'erreur commun (§6.5).
+# Format d'erreur commun (§6.5). Tous les champs sont optionnels.
 components:
   schemas:
-    StandardErrorObject:
+    StandardError:
       type: object
-      required: [errorCode, message]
       properties:
-        errorCode:
-          type: string
-          description: Code d'erreur applicatif stable.
-        message:
-          type: string
-          description: Message d'erreur destiné au consommateur.
-        moreInfo:
-          type: string
-          description: Complément d'information / lien de documentation.
-        developerText:
-          type: string
-          description: Détail technique à destination des développeurs.
+        code:          { type: string, minLength: 1, maxLength: 20,  description: "Code d'erreur applicatif stable." }
+        text:          { type: string, minLength: 1, maxLength: 40,  description: "Message d'erreur destiné au consommateur." }
+        developerText: { type: string, minLength: 1, maxLength: 70,  description: "Détail technique à destination des développeurs." }
+        moreInfo:      { type: string, maxLength: 256,               description: "Complément d'information / lien de documentation." }

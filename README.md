@@ -204,7 +204,7 @@ Tu n'as **pas** à écrire ceci — le build l'ajoute :
   `X-Institution-Id` (le seul requis), `X-User-Id`, `X-UserContext-Id`. `called`/`events`
   ajoutent `X-Processing-Route-Id` ; `events` ajoute les headers d'event.
 - **`Idempotency-Key`** : requis sur `POST`/`PATCH`, optionnel sur `PUT`/`DELETE`.
-- **Catalogue d'erreurs contextuel** (`StandardErrorObject`) :
+- **Catalogue d'erreurs contextuel** (`StandardError`) :
   toujours `400 401 403 405 406 429 500 502 503 504` ; **`404`** si l'opération a un paramètre
   de path ; **`409`** si écriture (`POST/PUT/PATCH/DELETE`) ; **`422`** si `requestBody`.
 - **Headers de réponse communs** sur chaque `2xx` (échos + `X-Processing-Route-Id`).

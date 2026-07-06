@@ -54,12 +54,12 @@ rules:
       function: truthy
 
   # --- Format d'erreur commun ---
-  socle-standard-error-object:
-    description: Le schéma commun d'erreur StandardErrorObject doit être présent.
+  socle-standard-error:
+    description: Le schéma commun d'erreur StandardError doit être présent.
     severity: error
     given: "$.components.schemas"
     then:
-      field: StandardErrorObject
+      field: StandardError
       function: truthy
 
   # --- Headers communs de requête (présents sur chaque opération ; X-Institution-Id requis) ---

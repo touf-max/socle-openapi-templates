@@ -1,5 +1,5 @@
 # Catalogue d'erreurs communes (§6.4). Chaque réponse porte les headers communs
-# et le schéma StandardErrorObject. Injectées par $ref selon la pertinence.
+# et le schéma StandardError. Injectées par $ref selon la pertinence.
 components:
   responses:
     Error400:
@@ -13,7 +13,7 @@ components:
         X-Processing-Route-Id: { $ref: '#/components/headers/ProcessingRouteId' }
       content: &errorContent
         application/json:
-          schema: { $ref: '#/components/schemas/StandardErrorObject' }
+          schema: { $ref: '#/components/schemas/StandardError' }
     Error401:
       description: Non authentifié.
       headers: *errorHeaders

@@ -31,7 +31,7 @@ tri, format d'erreur) est **factorisé** et hérité automatiquement.
 1. **Spécialisation minimale** — un projet ne redéfinit jamais ce qui est commun.
 2. **Composition en couches** — chaque contrat final = `socle` ⊕ `profil` ⊕ `projet`.
 3. **Convention over configuration** — pagination page-based, tri, format d'erreur
-   `StandardErrorObject` appliqués **par défaut**, désactivables/surchargeables au cas par cas.
+   `StandardError` appliqués **par défaut**, désactivables/surchargeables au cas par cas.
 4. **Une seule source de vérité** — les composants communs vivent à un seul endroit
    et sont référencés par `$ref` ; jamais copiés-collés.
 5. **Sortie standard** — le build produit un OpenAPI **bundlé et valide**,
@@ -80,7 +80,7 @@ openapi-socle/  (le package — ce dépôt)
 │   │   ├── base.yaml            # squelette OpenAPI
 │   │   ├── headers/{request,response}.yaml
 │   │   ├── responses/errors.yaml
-│   │   ├── schemas/{error,page}.yaml   # StandardErrorObject ; Page + Pagination
+│   │   ├── schemas/{error,page}.yaml   # StandardError ; Page + Pagination
 │   │   └── parameters/{pagination,sorting}.yaml
 │   ├── profiles/                # COUCHE 2 — exposed | called | events
 │   └── README.md
@@ -169,19 +169,19 @@ Surcharge possible par opération via `x-errors` / `x-no-errors` (§9.2).
 > Les **réponses de succès (`2xx`) restent à la charge du projet** — c'est le seul
 > code retour que chaque path doit déclarer explicitement.
 
-### 6.5 Format d'erreur — `StandardErrorObject`
+### 6.5 Format d'erreur — `StandardError`
 
-Toutes les réponses d'erreur du socle utilisent le schéma commun `StandardErrorObject` :
+Toutes les réponses d'erreur du socle utilisent le schéma commun `StandardError`.
+Tous les champs sont **optionnels** :
 
 ```yaml
-StandardErrorObject:
+StandardError:
   type: object
-  required: [errorCode, message]
   properties:
-    errorCode:     { type: string, description: "Code d'erreur applicatif stable." }
-    message:       { type: string, description: "Message d'erreur destiné au consommateur." }
-    moreInfo:      { type: string, description: "Complément d'information / lien de documentation." }
-    developerText: { type: string, description: "Détail technique à destination des développeurs." }
+    code:          { type: string, minLength: 1, maxLength: 20,  description: "Code d'erreur applicatif stable." }
+    text:          { type: string, minLength: 1, maxLength: 40,  description: "Message d'erreur destiné au consommateur." }
+    developerText: { type: string, minLength: 1, maxLength: 70,  description: "Détail technique à destination des développeurs." }
+    moreInfo:      { type: string, maxLength: 256,               description: "Complément d'information / lien de documentation." }
 ```
 
 ## 7. Spécificités par type (couche 2)
@@ -369,7 +369,7 @@ expansées par le build).
 | Version OpenAPI | **3.1** (support natif `webhooks`, alignement JSON Schema) | 3.0.x |
 | Bundling / lint | **Redocly CLI** (`@redocly/cli`) | `swagger-cli`, `openapi-merge` |
 | Merge des couches + macros | **Script Node/ESM maison** (`build.mjs`) ✅ décidé | Overlays OpenAPI (Overlay Spec 1.0) |
-| Format d'erreur | **`StandardErrorObject`** (maison) ✅ décidé | RFC 7807 Problem Details |
+| Format d'erreur | **`StandardError`** (maison) ✅ décidé | RFC 7807 Problem Details |
 | Events webhook | **Payload brut + métadonnées en headers** ✅ décidé | Enveloppe CloudEvents / maison |
 | Pagination | **Page-based, 0-based** + enveloppe `Page` ✅ décidé | Cursor-based, Link headers |
 

@@ -6,24 +6,28 @@ info:
   x-socle-version: 0.1.0
 components:
   schemas:
-    StandardErrorObject:
+    StandardError:
       type: object
-      required:
-        - errorCode
-        - message
       properties:
-        errorCode:
+        code:
           type: string
+          minLength: 1
+          maxLength: 20
           description: Code d'erreur applicatif stable.
-        message:
+        text:
           type: string
+          minLength: 1
+          maxLength: 40
           description: Message d'erreur destiné au consommateur.
-        moreInfo:
-          type: string
-          description: Complément d'information / lien de documentation.
         developerText:
           type: string
+          minLength: 1
+          maxLength: 70
           description: Détail technique à destination des développeurs.
+        moreInfo:
+          type: string
+          maxLength: 256
+          description: Complément d'information / lien de documentation.
     Pagination:
       type: object
       required:
@@ -294,7 +298,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error401:
       description: Non authentifié.
       headers:
@@ -313,7 +317,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error403:
       description: Accès refusé.
       headers:
@@ -332,7 +336,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error404:
       description: Ressource introuvable.
       headers:
@@ -351,7 +355,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error405:
       description: Méthode non autorisée.
       headers:
@@ -370,7 +374,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error406:
       description: Non acceptable.
       headers:
@@ -389,7 +393,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error409:
       description: Conflit.
       headers:
@@ -408,7 +412,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error422:
       description: Entité non traitable (validation métier).
       headers:
@@ -427,7 +431,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error429:
       description: Trop de requêtes.
       headers:
@@ -446,7 +450,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error500:
       description: Erreur interne.
       headers:
@@ -465,7 +469,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error502:
       description: Passerelle défaillante.
       headers:
@@ -484,7 +488,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error503:
       description: Service indisponible.
       headers:
@@ -503,7 +507,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
     Error504:
       description: Délai de passerelle dépassé.
       headers:
@@ -522,7 +526,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/StandardErrorObject'
+            $ref: '#/components/schemas/StandardError'
   securitySchemes:
     bearerAuth:
       type: http
