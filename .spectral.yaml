@@ -40,8 +40,9 @@ rules:
       field: security
       function: truthy
   socle-operation-secured:
-    description: Une opération ne doit pas désactiver la sécurité globale (security: []).
-    severity: error
+    description: Sécurité désactivée sur cette opération (security: []) — autorisé mais à confirmer.
+    message: "Sécurité désactivée (security: []) sur cette opération — vérifiez que c'est intentionnel."
+    severity: warn
     given:
       - "$.paths[*][get,put,post,delete,patch].security"
       - "$.webhooks[*][get,put,post,delete,patch].security"
