@@ -34,6 +34,7 @@ Autour, des outils de garde-fou : validation dictionnaire, non-régression, diff
 | `tools/` | Le moteur (voir ci-dessous) |
 | `golden/` | Baselines figées `<projet>.openapi.yaml` pour la non-régression |
 | `dico/` | Dictionnaires Estreem `.xlsx` (validation des champs annotés) |
+| `functions/` | Fonctions Spectral custom (ex. `versionMajorMatch.js`), référencées par `.spectral.yaml` |
 | `test/` | Tests `node:test` (`npm test`) |
 
 Un **projet** (couche 3) est un dossier contenant `api.yaml` (type + info + servers + tags) et,

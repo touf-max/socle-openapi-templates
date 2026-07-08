@@ -10,6 +10,7 @@
     "bin",
     "tools",
     "templates",
+    "functions",
     "redocly.yaml",
     ".spectral.yaml",
     "SPEC.md"

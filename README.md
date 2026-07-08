@@ -509,9 +509,10 @@ comme cassant, ajuster le contrat plutôt que forcer.
 
 **Cohérence version d'API ↔ base path** — la **majeure** de `info.version` (SemVer) doit
 **correspondre** à la majeure du base path (`/v1`, `/v2`). Ex. : `info.version: 2.3.0` ⇒ base path
-`…/v2/…`. Une divergence (du `2.x` servi sous `/v1`) est un **gros warning**, voire un **blocage à
-discuter** avec l'équipe Foundation : c'est le signe qu'une rupture a été introduite sans monter
-la majeure d'URL.
+`…/v2/…`. Une divergence (du `2.x` servi sous `/v1`) est le signe qu'une rupture a été introduite
+sans monter la majeure d'URL. C'est vérifié par la règle Spectral
+**`socle-version-major-matches-basepath`** — en **`warning`** (à arbitrer / passer en blocage avec
+l'équipe Foundation si besoin).
 
 ---
 
@@ -529,7 +530,8 @@ npm run spectral         # conformité au socle (Spectral : pas d'API key, heade
                          #   par méthode, X-Processing-Route-Id en réponse, identifiants au format uuid,
                          #   nommage camelCase, items d'array, codes d'erreur contextuels par méthode
                          #   (404/409/422 + catalogue), règles par type (events/called via
-                         #   info.x-socle-type), x-socle-version, operationId, tags…)
+                         #   info.x-socle-type), cohérence version majeure ↔ base path,
+                         #   x-socle-version, operationId, tags…)
 npm run check:regression # compare examples/ aux baselines golden/ (échoue sur rupture) — nécessite oasdiff
 npm run golden:update    # régénère les baselines golden/ (après un changement assumé)
 npm pack --dry-run       # aperçu du package publié
