@@ -125,7 +125,9 @@ export function checkProject(dir) {
   // On parcourt les schémas (bodies) + les inline des paths (params compris).
   const doc = { schemas: mergeFiles(globYaml(path.join(dir, 'schemas'))), paths: mergeFiles(globYaml(path.join(dir, 'paths'))) };
 
-  const dicoFile = path.join(ROOT, 'dico', version);
+  // Le dico est cherché dans dico/ à la racine du dépôt courant (process.cwd()), pas dans le
+  // package : chaque projet fournit son propre dico/<version>.xlsx.
+  const dicoFile = path.join(process.cwd(), 'dico', version);
   if (!fs.existsSync(dicoFile)) {
     let annotated = 0;
     walk(doc, name, { onId: () => annotated++, onLeafNoId: () => {}, onParamNoId: () => {} });
@@ -157,8 +159,8 @@ function projectDirs(root) {
     .filter((d) => fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'api.yaml')));
 }
 
-function main() {
-  const arg = process.argv[2];
+export function runCheckDictionaryCli(argv = process.argv.slice(2)) {
+  const arg = argv.find((a) => !a.startsWith('-'));
   const dirs = arg ? [path.resolve(arg)] : projectDirs(path.join(ROOT, 'examples'));
   let totalErr = 0, ran = 0;
   for (const dir of dirs) {
@@ -179,4 +181,4 @@ function main() {
   if (totalErr) process.exit(1);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) runCheckDictionaryCli();

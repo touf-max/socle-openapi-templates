@@ -83,8 +83,11 @@ la définition attendue (`type`, `pattern`, `minLength/maxLength`, `enum`, `frac
 ### `check-dictionary.mjs` — validation des champs annotés
 `checkProject(dir)` : parcourt (`walk`) les schémas de body **et** les schémas de paramètres,
 et pour chaque nœud portant un `x-dictionary-id` compare (`compareField`) sa définition à celle
-du dico. Sévérité : écart net → **erreur** (bloquante) ; ambigu (champ/param sans id, `?`,
-type structuré) → **warning**. Dico absent = bloquant seulement s'il y a des champs à valider.
+du dico (simple, codeset, ou **type structuré** résolu récursivement via `TypesStructures`).
+Sévérité : écart net → **erreur** (bloquante) ; ambigu (champ / param path·query sans id, `?`)
+→ **warning**. Dico absent = bloquant seulement s'il y a des champs à valider. Le dico est
+résolu depuis `dico/<version>` **relatif à `process.cwd()`** (chaque projet fournit son dico).
+CLI : `runCheckDictionaryCli(argv)` (→ `openapi-socle check-dictionary [projet]`).
 
 ### `diff.mjs` — niveau SemVer via oasdiff
 `diffContracts(base, rev)` lance `oasdiff` (binaire natif ou Docker) : ≥1 changement cassant →
@@ -97,7 +100,8 @@ Un changement **cassant** des templates fait échouer le job → il doit être a
 MAJOR (et `npm run golden:update` régénère les baselines).
 
 ### `bin/openapi-socle.mjs` — la CLI
-Dispatcher minimal : `build` → `buildProjects`, `import` → `runImportCli`, `diff` → `runDiffCli`.
+Dispatcher minimal : `build` → `buildProjects`, `import` → `runImportCli`, `diff` → `runDiffCli`,
+`check-dictionary` → `runCheckDictionaryCli`.
 Résout les **templates depuis le package** installé, mais lit le **projet et écrit la sortie
 chez l'appelant** (CWD) — c'est ce qui permet de distribuer le socle en dépendance.
 
