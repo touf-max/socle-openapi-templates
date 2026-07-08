@@ -156,15 +156,17 @@ mon-api/
 ├── api.yaml         # type + info + servers + tags
 ├── paths/           # 1 fichier par ressource ; chaque clé est une route
 │   └── *.yaml
-└── schemas/         # schémas métier (top-level = nom du schéma)
+└── schemas/         # schémas métier (top-level = nom du schéma), découpés par domaine
     └── *.yaml
 ```
 
 - **`api.yaml`** : `type` (obligatoire, retiré du contrat final) + la partie `info`/`servers`/`tags`.
 - **`paths/*.yaml`** : tous les fichiers sont fusionnés. Chaque route ne déclare **que ses
   réponses `2xx`** ; le reste est injecté.
-- **`schemas/*.yaml`** : tous fusionnés dans `components.schemas`. Référencer par
-  `$ref: '#/components/schemas/…'`.
+- **`schemas/*.yaml`** : tous fusionnés dans `components.schemas` (les `$ref` fonctionnent
+  entre fichiers). **Découpe recommandée : un fichier par domaine**, en calquant `paths/`
+  (ex. `card-agreements.yaml`, `cards.yaml`, `common.yaml` pour les types partagés) plutôt qu'un
+  seul gros fichier. Référencer par `$ref: '#/components/schemas/…'`.
 - **`events/*.yaml`** *(type `events` uniquement)* : un fichier par event (JSON Schema du
   payload + métadonnées `x-event-*`) ; le build génère les webhooks (cf. §5).
 

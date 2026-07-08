@@ -27,7 +27,7 @@
     "spectral": "spectral lint \"build/*.openapi.yaml\" --ruleset .spectral.yaml --fail-severity=error",
     "check:dictionary": "node tools/check-dictionary.mjs",
     "check:regression": "node tools/check-regression.mjs",
-    "golden:update": "node tools/build.mjs && cp build/*.openapi.yaml golden/"
+    "golden:update": "rm -f build/*.openapi.yaml && node tools/build.mjs && rm -f golden/*.openapi.yaml && cp build/*.openapi.yaml golden/"
   },
   "dependencies": {
     "js-yaml": "^4.1.0",
