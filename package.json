@@ -23,11 +23,13 @@
     "import": "node tools/import.mjs",
     "lint": "redocly lint build/*.openapi.yaml",
     "spectral": "spectral lint \"build/*.openapi.yaml\" --ruleset .spectral.yaml --fail-severity=error",
+    "check:dictionary": "node tools/check-dictionary.mjs",
     "check:regression": "node tools/check-regression.mjs",
     "golden:update": "node tools/build.mjs && cp build/*.openapi.yaml golden/"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "js-yaml": "^4.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@redocly/cli": "^1.25.0",

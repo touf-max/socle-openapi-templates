@@ -382,6 +382,7 @@ export function buildProject(dir, outDir = DEFAULT_OUT) {
   else doc.paths = deepMerge(doc.paths ?? {}, container);
 
   nullableOptionals(doc, nullable); // champs optionnels → nullable (requêtes par défaut, réponses en opt-in)
+  stripDictAnnotations(doc);   // retire x-dictionary-id + x-estreem-* (annotations internes ; x-dictionary-version conservé)
   pruneUnusedComponents(doc);  // n'émet que les composants réellement référencés (pas de pagination si non utilisée, etc.)
 
   validateRefs(doc, name);
@@ -397,6 +398,17 @@ function normalizeEventAck(op) {
   op.responses ??= {};
   for (const key of Object.keys(op.responses)) if (/^2/.test(key)) delete op.responses[key];
   op.responses['204'] = { description: 'Event acquitté par le partenaire (No Content).' };
+}
+
+// Retire les annotations internes du dictionnaire : x-dictionary-id et tout x-estreem-*.
+// x-dictionary-version (dans info) est conservé pour la traçabilité.
+function stripDictAnnotations(node) {
+  if (Array.isArray(node)) { node.forEach(stripDictAnnotations); return; }
+  if (!isObj(node)) return;
+  for (const k of Object.keys(node)) {
+    if (k === 'x-dictionary-id' || k.startsWith('x-estreem')) delete node[k];
+    else stripDictAnnotations(node[k]);
+  }
 }
 
 // ------------------------------------------------------------------ tree-shaking des composants

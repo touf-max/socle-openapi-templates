@@ -363,7 +363,10 @@ et **`openapi:release`** (sur tag `vX.Y.Z`, publie le contrat versionné sur Art
 
 ```bash
 npm install
-npm run build            # construit examples/ → build/
+npm run check:dictionary # (avant génération) valide les champs annotés x-dictionary-id contre le
+                         #   dictionnaire Estreem dico/<info.x-dictionary-version> : type, format, pattern,
+                         #   longueurs, enum (Codeset), digits. Écart net → erreur ; cas ambigu → warning.
+npm run build            # construit examples/ → build/ (retire x-dictionary-id + x-estreem-* du contrat)
 npm run lint             # validité OpenAPI (Redocly)
 npm run spectral         # conformité au socle (Spectral : pas d'API key, headers communs, Idempotency-Key
                          #   par méthode, X-Processing-Route-Id en réponse, identifiants au format uuid,
@@ -375,7 +378,7 @@ npm run golden:update    # régénère les baselines golden/ (après un changeme
 npm pack --dry-run       # aperçu du package publié
 ```
 
-Le pipeline complet en local : `npm run build && npm run lint && npm run spectral && npm run check:regression`.
+Le pipeline complet en local : `npm run check:dictionary && npm run build && npm run lint && npm run spectral && npm run check:regression`.
 
 **Installer `oasdiff`** (requis par `check:regression` et `openapi-socle diff`) :
 ```bash

@@ -1,0 +1,156 @@
+// Vérifie, AVANT la génération, que chaque champ de body annoté d'un x-dictionary-id est
+// conforme au dictionnaire Estreem : type, pattern (ancres normalisées), minLength/maxLength,
+// enum (Codeset), digits. Écart net → ERREUR (bloquant) ; cas ambigu → WARNING.
+//
+//   node tools/check-dictionary.mjs [projectDir]      (défaut : scan examples/)
+//
+// Résolution du dico : dico/<info.x-dictionary-version>.
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
+import yaml from 'js-yaml';
+import { loadDictionary } from './dictionary.mjs';
+
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const isObj = (v) => v !== null && typeof v === 'object' && !Array.isArray(v);
+const loadYaml = (f) => yaml.load(fs.readFileSync(f, 'utf8')) ?? {};
+const globYaml = (d) => (!fs.existsSync(d) ? [] : fs.readdirSync(d).filter((f) => /\.ya?ml$/.test(f)).sort().map((f) => path.join(d, f)));
+const mergeFiles = (files) => files.reduce((acc, f) => ({ ...acc, ...loadYaml(f) }), {});
+
+// type OpenAPI effectif (gère [type,"null"]).
+const effType = (t) => (Array.isArray(t) ? t.find((x) => x !== 'null') : t);
+// normalise une regex : retire ancres ^ … $ pour comparer au dico (qui ne les met pas).
+const normPat = (p) => (p == null ? null : String(p).replace(/^\^/, '').replace(/\$$/, ''));
+const isScalarLeaf = (f) => isObj(f) && !isObj(f.properties) && ['string', 'integer', 'number', 'boolean'].includes(effType(f.type));
+
+// Le dico met parfois un FORMAT OpenAPI dans sa colonne « type » (le champ est alors
+// type: string + format: X). Table de correspondance format → type OpenAPI.
+const FORMAT_TYPE = {
+  uuid: 'string', date: 'string', 'date-time': 'string', time: 'string', duration: 'string',
+  email: 'string', uri: 'string', url: 'string', hostname: 'string', ipv4: 'string', ipv6: 'string',
+  byte: 'string', binary: 'string', password: 'string',
+  int32: 'integer', int64: 'integer', float: 'number', double: 'number',
+};
+
+// Compare un champ à la définition attendue du dico → liste de { sev, msg }.
+function compareField(field, exp) {
+  const out = [];
+  const err = (m) => out.push({ sev: 'error', msg: m });
+  const warn = (m) => out.push({ sev: 'warn', msg: m });
+
+  if (exp.kind === 'unknown') { warn(`type dico « ${exp.typeName} » non résolu (type structuré ?)`); return out; }
+
+  const hasEnum = Array.isArray(field.enum);
+  const ft = effType(field.type);
+
+  // type + format (le dico peut exprimer un format à la place du type)
+  let expType = exp.type, expFormat = null;
+  if (exp.type && FORMAT_TYPE[exp.type]) { expFormat = exp.type; expType = FORMAT_TYPE[exp.type]; }
+  if (expType && ft && ft !== expType) err(`type « ${ft} » ≠ dico « ${expType} »`);
+  if (expFormat) {
+    if (field.format && field.format !== expFormat) err(`format « ${field.format} » ≠ dico « ${expFormat} »`);
+    else if (!field.format) warn(`format manquant (dico : « ${expFormat} »)`);
+  }
+
+  // pattern (ancres normalisées) — non pertinent pour un champ à enum
+  if (!hasEnum) {
+    const fp = normPat(field.pattern), ep = normPat(exp.pattern);
+    if (ep && fp && fp !== ep) err(`pattern « ${field.pattern} » ≠ dico « ${exp.pattern} »`);
+    else if (ep && !fp) warn(`pattern manquant (dico : « ${exp.pattern} »)`);
+  }
+
+  // longueurs — l'enum contraint déjà, on n'exige pas min/max dans ce cas
+  for (const k of ['minLength', 'maxLength']) {
+    if (exp[k] != null && field[k] != null && Number(field[k]) !== Number(exp[k])) err(`${k} ${field[k]} ≠ dico ${exp[k]}`);
+    else if (exp[k] != null && field[k] == null && !hasEnum) warn(`${k} manquant (dico : ${exp[k]})`);
+  }
+
+  // enum (Codeset)
+  if (exp.enum && exp.enum.length) {
+    if (!hasEnum) warn(`enum manquant (dico : ${exp.enum.length} valeur(s))`);
+    else {
+      const a = [...field.enum].map(String).sort(), b = [...exp.enum].map(String).sort();
+      if (a.length !== b.length || a.some((v, i) => v !== b[i])) err(`enum ≠ dico [${exp.enum.join(', ')}]`);
+    }
+  }
+
+  // digits (mapping OpenAPI ambigu → warning si non représenté)
+  if ((exp.fractionDigits != null || exp.totalDigits != null) && field.multipleOf == null && field.maximum == null) {
+    warn(`digits dico (fraction=${exp.fractionDigits ?? '-'}, total=${exp.totalDigits ?? '-'}) non vérifiables sur ce champ`);
+  }
+  return out;
+}
+
+// Parcourt les champs (propriétés) d'un doc et applique onField(field, path, name).
+function walkFields(node, p, onField) {
+  if (Array.isArray(node)) { node.forEach((n, i) => walkFields(n, `${p}[${i}]`, onField)); return; }
+  if (!isObj(node)) return;
+  if (isObj(node.properties)) {
+    for (const [name, field] of Object.entries(node.properties)) {
+      onField(field, `${p}.${name}`, name);
+      walkFields(field, `${p}.${name}`, onField);
+    }
+  }
+  for (const [k, v] of Object.entries(node)) if (k !== 'properties') walkFields(v, `${p}.${k}`, onField);
+}
+
+function checkProject(dir) {
+  const api = loadYaml(path.join(dir, 'api.yaml'));
+  const version = api.info?.['x-dictionary-version'];
+  if (!version) return null; // pas de dictionnaire déclaré → rien à vérifier
+
+  const dicoFile = path.join(ROOT, 'dico', version);
+  if (!fs.existsSync(dicoFile)) return { name: path.basename(dir), version, skipped: true }; // dico non fourni → on n'échoue pas
+  const dico = loadDictionary(dicoFile);
+
+  // On parcourt les schémas (bodies) + les inline des paths.
+  const doc = { schemas: mergeFiles(globYaml(path.join(dir, 'schemas'))), paths: mergeFiles(globYaml(path.join(dir, 'paths'))) };
+
+  const errors = [], warnings = [];
+  let checked = 0, leafNoId = 0;
+  walkFields(doc, path.basename(dir), (field, p) => {
+    if (!isObj(field)) return;
+    const id = field['x-dictionary-id'];
+    if (id != null) {
+      checked++;
+      const exp = dico.resolve(id);
+      if (!exp.found) { errors.push({ p, msg: `x-dictionary-id « ${id} » introuvable dans le dictionnaire` }); return; }
+      for (const { sev, msg } of compareField(field, exp)) (sev === 'error' ? errors : warnings).push({ p, msg });
+    } else if (isScalarLeaf(field)) {
+      leafNoId++;
+      warnings.push({ p, msg: 'champ scalaire sans x-dictionary-id — oubli ?' });
+    }
+  });
+  return { name: path.basename(dir), version, checked, leafNoId, errors, warnings };
+}
+
+function projectDirs(root) {
+  if (!fs.existsSync(root)) return [];
+  return fs.readdirSync(root).map((d) => path.join(root, d))
+    .filter((d) => fs.statSync(d).isDirectory() && fs.existsSync(path.join(d, 'api.yaml')));
+}
+
+function main() {
+  const arg = process.argv[2];
+  const dirs = arg ? [path.resolve(arg)] : projectDirs(path.join(ROOT, 'examples'));
+  let totalErr = 0, ran = 0;
+  for (const dir of dirs) {
+    let r;
+    try { r = checkProject(dir); } catch (e) { console.error(`✗ ${path.basename(dir)} : ${e.message}`); totalErr++; continue; }
+    if (!r) continue; // pas de x-dictionary-version
+    ran++;
+    if (r.skipped) { console.log(`\n▸ ${r.name}  ⚠ dico dico/${r.version} non fourni — validation ignorée`); continue; }
+    console.log(`\n▸ ${r.name}  (dico ${r.version}) — ${r.checked} champ(s) annoté(s) vérifié(s)`);
+    for (const e of r.errors) console.log(`  ✗ ${e.p} : ${e.msg}`);
+    for (const w of r.warnings.slice(0, 40)) console.log(`  ⚠ ${w.p} : ${w.msg}`);
+    if (r.warnings.length > 40) console.log(`  ⚠ … +${r.warnings.length - 40} autre(s) warning(s)`);
+    console.log(`  → ${r.errors.length} erreur(s), ${r.warnings.length} warning(s) (${r.leafNoId} champ(s) sans id).`);
+    totalErr += r.errors.length;
+  }
+  if (!ran) { console.log('Aucun projet avec info.x-dictionary-version.'); return; }
+  console.log(`\n${totalErr === 0 ? '✓ Conforme au dictionnaire.' : `✗ ${totalErr} écart(s) bloquant(s) avec le dictionnaire.`}`);
+  if (totalErr) process.exit(1);
+}
+
+if (import.meta.url === pathToFileURL(process.argv[1]).href) main();
