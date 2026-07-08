@@ -67,7 +67,8 @@ test('walk — repère les ids de body ET de params, signale les params sans id'
     } } },
     paths: { '/x': { get: { parameters: [
       { name: 'q', in: 'query', schema: { type: 'string', 'x-dictionary-id': '222' } }, // param annoté → onId
-      { name: 'r', in: 'query', schema: { type: 'string' } },                            // param sans id → onParamNoId
+      { name: 'r', in: 'query', schema: { type: 'string' } },                            // query sans id → onParamNoId
+      { name: 'X-Channel', in: 'header', schema: { type: 'string' } },                   // header sans id → PAS signalé
     ] } } },
   };
   const ids = [], leaves = [], params = [];
@@ -78,6 +79,6 @@ test('walk — repère les ids de body ET de params, signale les params sans id'
   });
   assert.deepEqual(ids.sort(), ['111', '222'], 'ids de body et de param détectés');
   assert.equal(leaves.length, 1, 'une feuille de body sans id');
-  assert.equal(params.length, 1, 'un paramètre sans id');
+  assert.equal(params.length, 1, 'seul le param path/query sans id est signalé (pas le header)');
   assert.match(params[0], /\(r\)/, 'le param sans id est bien « r »');
 });

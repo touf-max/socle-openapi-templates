@@ -102,8 +102,9 @@ export function walk(node, p, ctx) {
   if (Array.isArray(node)) { node.forEach((n, i) => walk(n, `${p}[${i}]`, ctx)); return; }
   if (!isObj(node)) return;
   if (node['x-dictionary-id'] != null) ctx.onId(node, p);
-  // paramètre (objet avec name + in) sans x-dictionary-id (ni sur lui-même ni sur son schema) → oubli ?
-  if (typeof node.name === 'string' && ['path', 'query', 'header', 'cookie'].includes(node.in) &&
+  // paramètre métier (path/query) sans x-dictionary-id (ni sur lui-même ni sur son schema) → oubli ?
+  // Les headers/cookies sont souvent techniques (canal, corrélation…) et sans équivalent dico : on ne les warne pas.
+  if (typeof node.name === 'string' && ['path', 'query'].includes(node.in) &&
       node['x-dictionary-id'] == null && !(isObj(node.schema) && node.schema['x-dictionary-id'] != null)) {
     ctx.onParamNoId(`${p} (${node.name})`);
   }
