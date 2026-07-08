@@ -88,6 +88,11 @@ function walk(node, p, ctx) {
   if (Array.isArray(node)) { node.forEach((n, i) => walk(n, `${p}[${i}]`, ctx)); return; }
   if (!isObj(node)) return;
   if (node['x-dictionary-id'] != null) ctx.onId(node, p);
+  // paramètre (objet avec name + in) sans x-dictionary-id (ni sur lui-même ni sur son schema) → oubli ?
+  if (typeof node.name === 'string' && ['path', 'query', 'header', 'cookie'].includes(node.in) &&
+      node['x-dictionary-id'] == null && !(isObj(node.schema) && node.schema['x-dictionary-id'] != null)) {
+    ctx.onParamNoId(`${p} (${node.name})`);
+  }
   if (isObj(node.properties)) {
     for (const [name, field] of Object.entries(node.properties))
       if (isObj(field) && field['x-dictionary-id'] == null && isScalarLeaf(field)) ctx.onLeafNoId(`${p}.${name}`);
@@ -106,14 +111,14 @@ function checkProject(dir) {
   const dicoFile = path.join(ROOT, 'dico', version);
   if (!fs.existsSync(dicoFile)) {
     let annotated = 0;
-    walk(doc, name, { onId: () => annotated++, onLeafNoId: () => {} });
+    walk(doc, name, { onId: () => annotated++, onLeafNoId: () => {}, onParamNoId: () => {} });
     if (annotated === 0) return { name, version, metadataOnly: true }; // x-dictionary-version = simple métadonnée
     throw new Error(`dictionnaire dico/${version} introuvable — ${annotated} champ(s) annoté(s) à valider`);
   }
   const dico = loadDictionary(dicoFile);
 
   const errors = [], warnings = [];
-  let checked = 0, leafNoId = 0, todo = 0;
+  let checked = 0, leafNoId = 0, paramNoId = 0, todo = 0;
   walk(doc, name, {
     onId(node, p) {
       const raw = node['x-dictionary-id'], id = String(raw).trim();
@@ -124,8 +129,9 @@ function checkProject(dir) {
       for (const { sev, msg } of compareField(node, exp)) (sev === 'error' ? errors : warnings).push({ p, msg });
     },
     onLeafNoId(p) { leafNoId++; warnings.push({ p, msg: 'champ scalaire sans x-dictionary-id — oubli ?' }); },
+    onParamNoId(p) { paramNoId++; warnings.push({ p, msg: 'paramètre sans x-dictionary-id — oubli ?' }); },
   });
-  return { name, version, checked, leafNoId, todo, errors, warnings };
+  return { name, version, checked, leafNoId, paramNoId, todo, errors, warnings };
 }
 
 function projectDirs(root) {
@@ -148,7 +154,7 @@ function main() {
     for (const e of r.errors) console.log(`  ✗ ${e.p} : ${e.msg}`);
     for (const w of r.warnings.slice(0, 40)) console.log(`  ⚠ ${w.p} : ${w.msg}`);
     if (r.warnings.length > 40) console.log(`  ⚠ … +${r.warnings.length - 40} autre(s) warning(s)`);
-    console.log(`  → ${r.errors.length} erreur(s), ${r.warnings.length} warning(s) (${r.leafNoId} sans id, ${r.todo} à renseigner).`);
+    console.log(`  → ${r.errors.length} erreur(s), ${r.warnings.length} warning(s) (${r.leafNoId} champ(s) + ${r.paramNoId} param(s) sans id, ${r.todo} à renseigner).`);
     totalErr += r.errors.length;
   }
   if (!ran && !totalErr) { console.log('Aucun projet avec info.x-dictionary-version.'); return; }
