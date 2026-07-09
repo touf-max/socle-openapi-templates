@@ -32,36 +32,7 @@
               type: string
               format: uuid
               description: Idempotency Key, to avoid duplicate processing of the same message.
-/issuing/authorisations/action-funds-transfer-scoring:
-  post:
-    operationId: scoringFundsTransfer
-    summary: Request for funds transfert scoring (Iss-OA6_001)
-    description: >-
-      Request for Anti Money Laundering scoring on funds transfer transactions<br><br>The path must not have any
-      parameters.
-    tags:
-      - Authorisation
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/FundsTransferScoringReq'
-    responses:
-      '200':
-        description: Scoring OK
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/FundsTransferScoringRes'
-        headers:
-          Idempotency-Key:
-            required: false
-            description: Idempotency Key, to avoid duplicate processing of the same message.
-            schema:
-              type: string
-              format: uuid
-              description: Idempotency Key, to avoid duplicate processing of the same message.
+              x-dictionary-id: Idempotency-Key
 /issuing/authorisations/advice:
   post:
     operationId: adviceAuth
@@ -97,6 +68,7 @@
               type: string
               format: uuid
               description: Idempotency Key, to avoid duplicate processing of the same message.
+              x-dictionary-id: Idempotency-Key
 /issuing/reversals/advice:
   post:
     operationId: adviceReversal
@@ -124,3 +96,43 @@
     responses:
       '204':
         description: No Content
+        headers:
+          Idempotency-Key:
+            required: false
+            description: Idempotency Key, to avoid duplicate processing of the same message.
+            schema:
+              type: string
+              format: uuid
+              description: Idempotency Key, to avoid duplicate processing of the same message.
+              x-dictionary-id: Idempotency-Key
+/issuing/authorisations/action-funds-transfer-scoring:
+  post:
+    operationId: scoringFundsTransfer
+    summary: Request for funds transfert scoring (Iss-OA6_001)
+    description: >-
+      Request for Anti Money Laundering scoring on funds transfer transactions<br><br>The path must not have any
+      parameters.
+    tags:
+      - Authorisation
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/FundsTransferScoringReq'
+    responses:
+      '200':
+        description: Scoring OK
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FundsTransferScoringRes'
+        headers:
+          Idempotency-Key:
+            required: false
+            description: Idempotency Key, to avoid duplicate processing of the same message.
+            schema:
+              type: string
+              format: uuid
+              description: Idempotency Key, to avoid duplicate processing of the same message.
+              x-dictionary-id: Idempotency-Key
